@@ -1,0 +1,26 @@
+ifndef TOP_SRCDIR
+    TOP_SRCDIR = .
+endif
+
+INCLDIR=$(TOP_SRCDIR)/include
+
+OBJCOPY = objcopy
+OBJDUMP = objdump
+RANLIB = ranlib
+QEMU = qemu-system-i386
+
+CFLAGS += -nostdinc -fno-builtin -fno-stack-protector -Wall -Wextra -m32 -I$(INCLDIR)
+
+# Release or Debug?
+#CFLAGS += -O2
+CFLAGS +=  -fvar-tracking-assignments -g -ggdb
+
+ASFLAGS += -m32 -Wa,-divide -nostdinc -I$(INCLDIR)
+LDFLAGS += -m elf_i386
+
+# Debug Settings
+GDBPORT = 26000
+
+# Emulation Settings
+CPUS = 2
+RAM = 512
