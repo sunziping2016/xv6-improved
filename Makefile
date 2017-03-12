@@ -4,6 +4,7 @@ include $(TOP_SRCDIR)/Makefile.common
 all: build/xv6.img build/fs.img
 
 build/xv6.img: boot/bootblock kernel/kernel
+	mkdir -p build
 	dd if=/dev/zero of=build/xv6.img count=10000
 	dd if=boot/bootblock of=build/xv6.img conv=notrunc
 	dd if=kernel/kernel of=build/xv6.img seek=1 conv=notrunc
