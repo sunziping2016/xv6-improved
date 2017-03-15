@@ -1,6 +1,10 @@
 struct stat;
 struct rtcdate;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
@@ -37,3 +41,7 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+#ifdef __cplusplus
+}
+#endif
