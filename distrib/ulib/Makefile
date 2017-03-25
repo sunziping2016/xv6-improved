@@ -5,8 +5,10 @@ ULIB = ulib.o usys.o printf.o umalloc.o
 
 all: ulib.a
 
+install:
+
 ulib.a: $(ULIB)
-	$(AR) vr ulib.a ulib.o usys.o printf.o umalloc.o
+	$(AR) vr ulib.a $^
 	$(RANLIB) ulib.a
 
 clean:

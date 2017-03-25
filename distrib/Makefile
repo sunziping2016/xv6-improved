@@ -1,15 +1,21 @@
 TOP_SRCDIR = ..
 include $(TOP_SRCDIR)/Makefile.common
 
-all:
-	$(MAKE) -C ulib all
-	$(MAKE) -C uprogs all
-
-install:
-	$(MAKE) -C uprogs install
-
-clean:
-	$(MAKE) -C ulib clean
-	$(MAKE) -C uprogs clean
+SUBDIRS = ulib uprogs
 
 .PHONY: all install clean
+
+all:
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir all; \
+	done
+
+install:
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir install; \
+	done
+
+clean:
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done
