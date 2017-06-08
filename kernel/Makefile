@@ -63,10 +63,10 @@ $(OUTDIR)/vectors.o: vectors.pl | $(OUTDIR)
 	$(CC) $(OUTDIR)/vectors.S $(CFLAGS) -c -o $@
 
 $(OUTDIR)/%.o: %.c | $(OUTDIR)
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) $< $(CFLAGS) -fno-pic -c -o $@
 
 $(OUTDIR)/%.o: %.S | $(OUTDIR)
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) $< $(CFLAGS) -fno-pic -c -o $@
 
 $(OUTDIR):
 	mkdir -p $@
