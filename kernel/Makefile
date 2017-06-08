@@ -1,6 +1,8 @@
 TOP_SRCDIR = ..
 include $(TOP_SRCDIR)/Makefile.common
 
+OUTDIR = $(BUILDDIR)/kernel
+
 OBJS = \
 	bio.o\
 	console.o\
@@ -33,29 +35,43 @@ OBJS = \
 	vectors.o\
 	vm.o\
 
-.PHONY: all clean
+_OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 
 all: kernel
 
-entryother: entryother.S
-	$(CC) $(CFLAGS) -fno-pic -c entryother.S
-	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7000 -o entryother.out entryother.o
-	$(OBJCOPY) -S -O binary -j .text entryother.out entryother
-	#$(OBJDUMP) -S entryother.out > entryother.asm
+kernel: $(OUTDIR)/kernel
 
-initcode: initcode.S
-	$(CC) $(CFLAGS) -c initcode.S
-	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o initcode.out initcode.o
-	$(OBJCOPY) -S -O binary initcode.out initcode
-	#$(OBJDUMP) -S initcode.o > initcode.asm
+$(OUTDIR)/entryother: entryother.S | $(OUTDIR)
+	$(CC) $(CFLAGS) -fno-pic -c entryother.S -o $(OUTDIR)/entryother.o
+	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7000 -o $(OUTDIR)/entryother.out $(OUTDIR)/entryother.o
+	$(OBJCOPY) -S -O binary -j .text $(OUTDIR)/entryother.out $(OUTDIR)/entryother
+	$(OBJDUMP) -S $(OUTDIR)/entryother.out > $(OUTDIR)/entryother.asm
 
-kernel: $(OBJS) entryother initcode kernel.ld
-	$(LD) $(LDFLAGS) -T kernel.ld -o kernel $(OBJS) -b binary initcode entryother
-	#$(OBJDUMP) -S kernel > kernel.asm
-	#$(OBJDUMP) -t kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
+$(OUTDIR)/initcode: initcode.S | $(OUTDIR)
+	$(CC) $(CFLAGS) -c initcode.S -o $(OUTDIR)/initcode.o
+	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o $(OUTDIR)/initcode.out $(OUTDIR)/initcode.o
+	$(OBJCOPY) -S -O binary $(OUTDIR)/initcode.out $(OUTDIR)/initcode
+	$(OBJDUMP) -S $(OUTDIR)/initcode.o > $(OUTDIR)/initcode.asm
 
-vectors.S: vectors.pl
-	perl vectors.pl > vectors.S
+$(OUTDIR)/kernel: $(_OBJS) $(OUTDIR)/entryother $(OUTDIR)/initcode kernel.ld | $(OUTDIR)
+	$(LD) $(LDFLAGS) -T kernel.ld -o $@ $(_OBJS) -b binary $(OUTDIR)/initcode $(OUTDIR)/entryother
+	$(OBJDUMP) -S $@ > $(OUTDIR)/kernel.asm
+	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $(OUTDIR)/kernel.sym
+
+$(OUTDIR)/vectors.o: vectors.pl | $(OUTDIR)
+	perl vectors.pl > $(OUTDIR)/vectors.S
+	$(CC) $(OUTDIR)/vectors.S $(CFLAGS) -c -o $@
+
+$(OUTDIR)/%.o: %.c | $(OUTDIR)
+	$(CC) $< $(CFLAGS) -c -o $@
+
+$(OUTDIR)/%.o: %.S | $(OUTDIR)
+	$(CC) $< $(CFLAGS) -c -o $@
+
+$(OUTDIR):
+	mkdir -p $@
 
 clean:
-	rm -f *.o *.asm *.sym *.out entryother initcode vectors.S kernel
+	rm -f $(OUTDIR)/*
+
+.PHONY: all kernel clean

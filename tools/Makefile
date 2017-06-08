@@ -1,7 +1,19 @@
-mkfs: mkfs.c
+TOP_SRCDIR = ..
+include $(TOP_SRCDIR)/Makefile.common
+
+OUTDIR = $(BUILDDIR)/tools
+
+all: $(OUTDIR)/mkfs
+
+mkfs: $(OUTDIR)/mkfs
+
+$(OUTDIR)/mkfs: mkfs.c | $(OUTDIR)
 	$(CC) -Wextra -Wall -O2 -o $@ $^ -I../include
 
 clean:
-	rm -f mkfs
+	rm -f $(OUTDIR)/*
 
-.PHONY: clean
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
+
+.PHONY: all mkfs clean

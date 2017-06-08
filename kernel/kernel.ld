@@ -65,4 +65,9 @@ SECTIONS
 	/DISCARD/ : {
 		*(.eh_frame .note.GNU-stack)
 	}
+
+	PROVIDE(_binary_entryother_start = _binary____build_kernel_entryother_start);
+	PROVIDE(_binary_entryother_size = _binary____build_kernel_entryother_size);
+	PROVIDE(_binary_initcode_start = _binary____build_kernel_initcode_start);
+	PROVIDE(_binary_initcode_size = _binary____build_kernel_initcode_size);
 }

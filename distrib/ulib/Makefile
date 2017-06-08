@@ -1,17 +1,30 @@
 TOP_SRCDIR = ../..
 include $(TOP_SRCDIR)/Makefile.common
 
+OUTDIR = $(BUILDDIR)/distrib/ulib
+
 ULIB = ulib.o usys.o printf.o umalloc.o
 
-all: ulib.a
+_ULIB = $(addprefix $(OUTDIR)/, $(ULIB))
+
+all: $(OUTDIR)/ulib.a
 
 install:
 
-ulib.a: $(ULIB)
-	$(AR) vr ulib.a $^
-	$(RANLIB) ulib.a
+$(OUTDIR)/ulib.a: $(_ULIB) | $(OUTDIR)
+	$(AR) vr $@ $^
+	$(RANLIB) $@
+
+$(OUTDIR)/%.o: %.c | $(OUTDIR)
+	$(CC) $< $(CFLAGS) -c -o $@
+
+$(OUTDIR)/%.o: %.S | $(OUTDIR)
+	$(CC) $< $(CFLAGS) -c -o $@
 
 clean:
-	rm -f *.o ulib.a
+	rm -f $(OUTDIR)/*
 
-.PHONY: all clean
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
+
+.PHONY: all install clean
