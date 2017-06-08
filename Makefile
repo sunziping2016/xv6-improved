@@ -3,32 +3,35 @@ include $(TOP_SRCDIR)/Makefile.common
 
 all: build/xv6.img build/fs.img
 
-build/xv6.img: boot/bootblock kernel/kernel
+build/xv6.img: build/boot/bootblock build/kernel/kernel
 	mkdir -p build
 	dd if=/dev/zero of=build/xv6.img count=10000
-	dd if=boot/bootblock of=build/xv6.img conv=notrunc
-	dd if=kernel/kernel of=build/xv6.img seek=1 conv=notrunc
+	dd if=build/boot/bootblock of=build/xv6.img conv=notrunc
+	dd if=build/kernel/kernel of=build/xv6.img seek=1 conv=notrunc
 
-boot/bootblock:
+build/boot/bootblock: FORCE
 	$(MAKE) -C boot bootblock
 
-kernel/kernel:
+build/kernel/kernel: FORCE
 	$(MAKE) -C kernel kernel
 
-tools/mkfs:
+build/tools/mkfs: FORCE
 	$(MAKE) -C tools mkfs
 
-build/fs.img: tools/mkfs
+build/fs.img: build/fs/README build/tools/mkfs
+	build/tools/mkfs build/fs.img build/fs
+
+build/fs/README: FORCE
 	mkdir -p build/fs
-	cp ORIG-README build/fs/README
 	$(MAKE) -C distrib install
-	tools/mkfs build/fs.img build/fs
+	cp -u ORIG-README $@
+	for i in $$(find build/fs -type f); do if [ $$i -nt $@ ]; then touch -r $$i $@; fi; done
 
 clean:
 	$(MAKE) -C boot clean
 	$(MAKE) -C kernel clean
-	$(MAKE) -C tools clean
 	$(MAKE) -C distrib clean
+	$(MAKE) -C tools clean
 	rm -rf build/*
 
 QEMUOPTS = -drive file=build/fs.img,index=1,media=disk,format=raw -drive file=build/xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m $(RAM) $(QEMUEXTRA)
@@ -48,4 +51,6 @@ qemu-nox-gdb: build/fs.img build/xv6.img
 	@echo "*** Now run 'gdb'." 1>&2
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
 
-.PHONY: all clean qemu qemu-nox qemu-gdb qemu-nox-gdb boot/bootblock kernel/kernel tools/mkfs build/fs.img
+.PHONY: all clean qemu qemu-nox qemu-gdb qemu-nox-gdb
+
+FORCE:
