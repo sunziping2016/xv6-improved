@@ -3,6 +3,7 @@ ifndef TOP_SRCDIR
 endif
 
 INCLDIR=$(TOP_SRCDIR)/include
+BUILDDIR=$(TOP_SRCDIR)/build
 
 OBJCOPY = objcopy
 OBJDUMP = objdump
