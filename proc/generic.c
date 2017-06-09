@@ -67,7 +67,7 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
   free(p);
 }
 
-struct proc_dir_entry *proc_lookup(const char *path)
+struct proc_dir_entry *proc_lookup(const char *name)
 {
   if(!name)
     return;
@@ -75,9 +75,9 @@ struct proc_dir_entry *proc_lookup(const char *path)
   int nextIndex = 1;
   proc_dir_entry* currentPDE = proc_root;
   bool findFlag = false;
-  while(path[currentIndex] == '/')
+  while(name[currentIndex] == '/')
   {
-    while(path[nextIndex] != '/' && path[nextIndex] != '\0')
+    while(name[nextIndex] != '/' && name[nextIndex] != '\0')
       nextIndex++;
     while(currentPDE != NULL)
     {
