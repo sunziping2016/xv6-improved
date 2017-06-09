@@ -1,27 +1,52 @@
 ﻿//copy from Linux
+enum pdestate { UNUSED, USED };
 struct proc_dir_entry
 {
-  unsigned int low_ino;
-	umode_t mode;
-	nlink_t nlink;
-	kuid_t uid;
-	kgid_t gid;
+	unsigned short namelen;
+  const char *name;
+  unsigned int mode;
+  unsigned int filetype;
+  enum pdestate;
+  struct proc_dir_entry *next, *parent, *subdir;
+	void *data;
+  read_proc_t *read_proc;
+	write_proc_t *write_proc;
+};
+
+
+/*struct proc_dir_entry
+{
+  unsigned int low_ino;	//inode号
+	unsigned short namelen;
+	const char *name;
+	mode_t mode;
+	nlink_t nlink;//子目录和软链接的数目
+	uid_t uid;
+	gid_t gid;
 	loff_t size;
 	const struct inode_operations *proc_iops;
 	const struct file_operations *proc_fops;
-	struct proc_dir_entry *parent;
-	struct rb_root subdir;
-	struct rb_node subdir_node;
+	get_info_t *get_info;
+	struct module *owner;
+	struct proc_dir_entry *next, *parent, *subdir;
 	void *data;
-	atomic_t count;		/* use count */
-	atomic_t in_use;	/* number of callers into module in progress; */
-			/* negative -" it's going away RSN */
-	struct completion *pde_unload_completion;
-	struct list_head pde_openers;	/* who did -"open, but not -"release */
-	spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
-	u8 namelen;
-	char name[];
+	read_proc_t *read_proc;
+	write_proc_t *write_proc;
+	atomic_t count; //use count
+	int deleted; //delete flag
+	kdev_t rdev; 
 };
+struct proc_inode {
+	struct pid *pid;
+	unsigned int fd;
+	union proc_op op;
+	struct proc_dir_entry *pde;
+	struct ctl_table_header *sysctl;
+	struct ctl_table *sysctl_entry;
+	struct list_head sysctl_inodes;
+	const struct proc_ns_operations *ns_ops;
+	struct inode vfs_inode;
+};*/
 //创建普通文件
 struct proc_dir_entry* create_proc_entry(const char* name,mode_t mode,struct proc_dir_entry* parent);
 //创建链接
