@@ -9,12 +9,11 @@ struct proc_dir_entry
 	void *data;
   read_proc_t *read_proc;
 	write_proc_t *write_proc;
+  struct spinlock lock;
 };
 
-struct {
-    struct spinlock lock;
-    struct proc_dir_entry*root;
-} pde_table;
+struct proc_dir_entry*root;
+
 /*struct proc_dir_entry
 {
   unsigned int low_ino;	//inode号

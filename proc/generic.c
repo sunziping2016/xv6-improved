@@ -16,12 +16,13 @@ struct proc_dir_entry *proc_mkdir(const char *name,unsigned int mode,unsigned in
     newpde=newpde->next;
   }
   //alloc
-  if((newpde=(proc_dir_entry*)malloc(sizeof(proc_dir_entry)))==0)
+  unsigned short len=strlen(newpde.name);
+  if((newpde=(proc_dir_entry*)malloc(sizeof(struct proc_dir_entry)+len+1))==0)
     return 0;
-  acquire(&pde_table.lock);
+  newpde.name=newpde+sizeof(struct proc_dir_entry);
   //init
-  newpde.name=name;
-  newpde.namelen=strlen(newpde.name);
+  strcpy(newpde.name,name);
+  newpde.namelen=len
   newpde.mode=mode;
   newpde.pdetype=pdetype;
   newpde.data=data;
@@ -31,9 +32,9 @@ struct proc_dir_entry *proc_mkdir(const char *name,unsigned int mode,unsigned in
   newpde.subdir=0;
   newpde.parent=parent;
   newpde.next=parent.subdir;
+  acquire(&parent.lock);
   parent.subdir=newpde;
-  
-  release(&pde_table.lock);
+  release(&parent.lock);
   return newpde;
 }
 void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
@@ -49,13 +50,20 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
   }
   return;
   found:
-  acquire(&pde_table.lock);
-  p->pdestate=UNUSED;
+  acquire(&p.lock);
   if(q==0)
+  {
+    acquire(&parent.lock);
     parent.subdir=p->next;
-  else q->next=p->next;
+    release(&parent.lock);
+  }
+  else {
+    acquire(&parent.lock);
+    q->next=p->next;
+    release(&q.lock);
+  }
+  free(p.name);
   free(p);
-  release(&pde_table.lock);
 }
 
 struct proc_dir_entry*proc_lookup(const char *name)//识别绝对和相对路径
