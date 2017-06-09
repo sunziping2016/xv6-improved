@@ -1,4 +1,4 @@
-//copy from Linux
+ï»¿//copy from Linux
 struct proc_dir_entry
 {
   unsigned int low_ino;
@@ -22,22 +22,22 @@ struct proc_dir_entry
 	u8 namelen;
 	char name[];
 };
-//´´½¨ÆÕÍ¨ÎÄ¼ş
+//åˆ›å»ºæ™®é€šæ–‡ä»¶
 struct proc_dir_entry* create_proc_entry(const char* name,mode_t mode,struct proc_dir_entry* parent);
-//´´½¨Á´½Ó
+//åˆ›å»ºé“¾æ¥
 struct proc_dir_entry* proc_symlink(const char* name, struct proc_dir_entry* parent, const char* dest);
-//´´½¨Éè±¸ÎÄ¼ş
+//åˆ›å»ºè®¾å¤‡æ–‡ä»¶
 struct proc_dir_entry* proc_mknod(const char* name, mode_t mode, struct proc_dir_entry* parent, kdev_t rdev);
-//´´½¨Ä¿Â¼
+//åˆ›å»ºç›®å½•
 struct proc_dir_entry* proc_mkdir(const char* name, struct proc_dir_entry* parent);
 struct proc_dir_entry *proc_mkdir(const char *name,struct proc_dir_entry *parent)
 {
        return proc_mkdir_mode(name, S_IRUGO | S_IXUGO, parent);
 }
-//ÒÆ³ı
+//ç§»é™¤
 void remove_proc_entry(const char* name, struct proc_dir_entry*parent);
 
-//»Øµ÷º¯Êı
+//å›è°ƒå‡½æ•°
 int read_func(char* page, char** start, off_t off, int count,int* eof, void* data);
 
 
@@ -54,5 +54,5 @@ static inline struct proc_dir_entry *create_proc_read_entry(const char *name,mod
         res->read_proc=read_proc;
         res->data=data;
     }
-    return res;
+      return res;
 }
