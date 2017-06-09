@@ -3,21 +3,21 @@
 struct {
     struct spinlock lock;
     struct proc_dir_entry pde[NPDE];
-} proc_table;
+} pde_table;
 
-struct proc_dir_entry *proc_alloc(void)
+struct proc_dir_entry *pde_alloc(void)
 {
-  acquire(&proc_table.lock);
+  acquire(&pde_table.lock);
   for(int i=0; i<NPDE;i++)
   {
-    if(proc_table[i].pdestate==UNUSED)
+    if(pde_table[i].pdestate==UNUSED)
     {
-      proc_table[i].pdestate=USED;
-      release(&proc_table.lock);
-      return &proc_table[i];
+      pde_table[i].pdestate=USED;
+      release(&pde_table.lock);
+      return &pde_table[i];
     }
   }
-  release(&proc_table.lock);
+  release(&pde_table.lock);
   return 0;
 }
 struct proc_dir_entry *proc_mkdir(const char *name,unsigned int mode,struct proc_dir_entry *parent, void *data)
