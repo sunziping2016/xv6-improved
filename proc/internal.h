@@ -1,19 +1,20 @@
 ﻿//copy from Linux
-enum pdestate { UNUSED, USED };
 struct proc_dir_entry
 {
 	unsigned short namelen;
   const char *name;
   unsigned int mode;
-  unsigned int filetype;
-  enum pdestate;
+  unsigned int pdetype;//0 None 1 Dir 2 File
   struct proc_dir_entry *next, *parent, *subdir;
 	void *data;
   read_proc_t *read_proc;
 	write_proc_t *write_proc;
 };
 
-
+struct {
+    struct spinlock lock;
+    struct proc_dir_entry*root;
+} pde_table;
 /*struct proc_dir_entry
 {
   unsigned int low_ino;	//inode号
@@ -47,6 +48,7 @@ struct proc_inode {
 	const struct proc_ns_operations *ns_ops;
 	struct inode vfs_inode;
 };*/
+/*
 //创建普通文件
 struct proc_dir_entry* create_proc_entry(const char* name,mode_t mode,struct proc_dir_entry* parent);
 //创建链接
@@ -81,3 +83,4 @@ static inline struct proc_dir_entry *create_proc_read_entry(const char *name,mod
     }
       return res;
 }
+*/
