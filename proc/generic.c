@@ -3,7 +3,7 @@
 #include "internal.h"
 #define NPDE 100
 
-struct proc_dir_entry *proc_mkdir(const char *name,unsigned int mode,unsigned int pdetype,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc,write_proc_t *write_proc)
+struct proc_dir_entry *proc_mkdir(const char *name,unsigned int mode,unsigned int pdetype,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)
 {
   if(parent.pdetype!=1)
     return 0;
@@ -27,7 +27,7 @@ struct proc_dir_entry *proc_mkdir(const char *name,unsigned int mode,unsigned in
   newpde.pdetype=pdetype;
   newpde.data=data;
   newpde.read_proc=read_proc;
-  newpde.write_proc=write_proc;
+  //newpde.write_proc=write_proc;
   //insert
   newpde.subdir=0;
   newpde.parent=parent;

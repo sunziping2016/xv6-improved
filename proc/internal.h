@@ -7,8 +7,9 @@ struct proc_dir_entry
   unsigned int pdetype;//0 None 1 Dir 2 File
   struct proc_dir_entry *next, *parent, *subdir;
 	void *data;
-  read_proc_t *read_proc;
-	write_proc_t *write_proc;
+  int (*read_proc)(char *page, int count, void *data)
+  //read_proc_t *read_proc;
+	//write_proc_t *write_proc;
   struct spinlock lock;
 };
 
