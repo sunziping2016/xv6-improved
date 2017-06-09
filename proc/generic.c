@@ -1,5 +1,5 @@
-﻿#include "xv6/user.h"
-
+#include "internal.h"
+#include "xv6/user.h"
 #include "internal.h"
 #define NPDE 100
 
@@ -37,6 +37,7 @@ struct proc_dir_entry *proc_mkdir(const char *name,unsigned int mode,unsigned in
   release(&parent.lock);
   return newpde;
 }
+
 void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 {
   proc_dir_entry*p=parent.subdir;
@@ -66,9 +67,46 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
   free(p);
 }
 
-struct proc_dir_entry*proc_lookup(const char *name)//识别绝对和相对路径
+struct proc_dir_entry *proc_lookup(const char *name)//识别绝对和相对路径
 {
-  
+  if(!name)
+    return;
+  int currentIndex = 0;
+  int nextIndex = 1;
+  proc_dir_entry* currentPDE = proc_root;
+  bool findFlag = false;
+  while(name[currentIndex] == '/')
+  {
+    while(name[nextIndex] != '/' && name[nextIndex] != '\0')
+      nextIndex++;
+    while(currentPDE != NULL)
+    {
+      if(currentPDE->namelen != nextIndex - currentIndex - 1)
+      {
+        currentPDE = currentPDE->next;
+        continue;
+      }
+      for(int i = currentIndex + 1; i < nextIndex; ++i)
+      {
+        if(path[i] != currentPDE->name[i - currentIndex - 1])
+        {
+          currentPDE = currentPDE->next;
+          continue;
+        }
+      }
+      findFlag = true;
+      currentPDE = currentPDE->subdir;
+      break;
+    }
+    if(!findFlag)
+    {
+      cprintf("file not found!");
+      return 0;
+    }
+    currentIndex = nextIndex;
+    nextIndex++;
+  }
+  return currentPDE;
 }
 //proc_root_lookup proc_lookup proc_pid_lookup 
 
