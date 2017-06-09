@@ -1,11 +1,5 @@
-<<<<<<< HEAD
 #include "internal.h"
-#include "xv6/defs.h"
-#define NPDE 100
-=======
-ï»¿#include "xv6/user.h"
->>>>>>> 453623813e4158a0bbf85eb098083c2316d90339
-
+#include "xv6/user.h"
 #include "internal.h"
 #define NPDE 100
 
@@ -73,11 +67,7 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
   free(p);
 }
 
-<<<<<<< HEAD
-struct proc_dir_entry *proc_lookup(const char *path)//Ê¶±ð¾ø¶ÔºÍÏà¶ÔÂ·¾¶
-=======
-struct proc_dir_entry*proc_lookup(const char *name)//è¯†åˆ«ç»å¯¹å’Œç›¸å¯¹è·¯å¾„
->>>>>>> 453623813e4158a0bbf85eb098083c2316d90339
+struct proc_dir_entry *proc_lookup(const char *path)
 {
   if(!name)
     return;
