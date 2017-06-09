@@ -1,38 +1,72 @@
 #include "internal.h"
-#include "xv6/defs.h"
+#include "xv6/user.h"
+#include "internal.h"
 #define NPDE 100
 
-struct {
-    struct spinlock lock;
-    struct proc_dir_entry pde[NPDE];
-} pde_table;
-
-struct proc_dir_entry *pde_alloc(void)
+struct proc_dir_entry *proc_mkdir(const char *name,enum pdetype,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)//æ’å…¥é¡ºåºå¾…æ”¹
 {
-  acquire(&pde_table.lock);
-  for(int i=0; i<NPDE;i++)
+  if(parent.pdetype!=1)
+    return 0;
+  proc_dir_entry*newpde=parent;
+  //search if exist
+  while(newpde!=0)
   {
-    if(pde_table[i].pdestate==UNUSED)
-    {
-      pde_table[i].pdestate=USED;
-      release(&pde_table.lock);
-      return &pde_table[i];
-    }
+    if(strcmp(newpde.name,name)==0)
+      return 0;
+    newpde=newpde->next;
   }
-  release(&pde_table.lock);
-  return 0;
-}
-struct proc_dir_entry *proc_mkdir(const char *name,unsigned int mode,struct proc_dir_entry *parent, void *data)
-{
-  
+  //alloc
+  unsigned short len=strlen(newpde.name);
+  if((newpde=(proc_dir_entry*)malloc(sizeof(struct proc_dir_entry)+len+1))==0)
+    return 0;
+  newpde.name=newpde+sizeof(struct proc_dir_entry);
+  //init
+  strcpy(newpde.name,name);
+  newpde.namelen=len
+  newpde.pdetype=pdetype;
+  newpde.data=data;
+  newpde.read_proc=read_proc;
+  //newpde.write_proc=write_proc;
+  //insert
+  newpde.subdir=0;
+  newpde.parent=parent;
+  newpde.next=parent.subdir;
+  acquire(&parent.lock);
+  parent.subdir=newpde;
+  release(&parent.lock);
+  return newpde;
 }
 
-void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
+void remove_proc_entry(const char *name, struct proc_dir_entry *parent)//éé€’å½’
 {
-  
+  proc_dir_entry*p=parent.subdir;
+  proc_dir_entry*q=0;
+  while(p!=0)
+  {
+    if(strcmp(p.name,name)==0)
+      goto found;
+    q=p;
+    p=p->next;
+  }
+  return;
+  found:
+  acquire(&p.lock);
+  if(q==0)
+  {
+    acquire(&parent.lock);
+    parent.subdir=p->next;
+    release(&parent.lock);
+  }
+  else {
+    acquire(&parent.lock);
+    q->next=p->next;
+    release(&q.lock);
+  }
+  free(p.name);
+  free(p);
 }
 
-struct proc_dir_entry *proc_lookup(const char *path)//Ê¶±ğ¾ø¶ÔºÍÏà¶ÔÂ·¾¶
+struct proc_dir_entry *proc_lookup(const char *name)//è¯†åˆ«ç»å¯¹å’Œç›¸å¯¹è·¯å¾„
 {
   if(!name)
     return;
@@ -40,9 +74,9 @@ struct proc_dir_entry *proc_lookup(const char *path)//Ê¶±ğ¾ø¶ÔºÍÏà¶ÔÂ·¾¶
   int nextIndex = 1;
   proc_dir_entry* currentPDE = proc_root;
   bool findFlag = false;
-  while(path[currentIndex] == '/')
+  while(name[currentIndex] == '/')
   {
-    while(path[nextIndex] != '/' && path[nextIndex] != '\0')
+    while(name[nextIndex] != '/' && name[nextIndex] != '\0')
       nextIndex++;
     while(currentPDE != NULL)
     {
@@ -73,5 +107,5 @@ struct proc_dir_entry *proc_lookup(const char *path)//Ê¶±ğ¾ø¶ÔºÍÏà¶ÔÂ·¾¶
   }
   return currentPDE;
 }
-//proc¡ª_root_lookup proc_lookup proc_pid_lookup 
+//proc_root_lookup proc_lookup proc_pid_lookup 
 
