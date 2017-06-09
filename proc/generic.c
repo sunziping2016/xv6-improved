@@ -67,7 +67,7 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
   free(p);
 }
 
-struct proc_dir_entry *proc_lookup(const char *name)
+struct proc_dir_entry *proc_lookup(const char *name)//识别绝对和相对路径
 {
   if(!name)
     return;
