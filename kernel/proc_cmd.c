@@ -1,5 +1,5 @@
 #include "xv6/proc_fs.h"
-#include "xv6/defs.h"
+#include "xv6/user.h"
 
 #define pList 0
 #define pCd 1
