@@ -43,9 +43,9 @@ struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype type,struct pro
   newpde->subdir=0;
   newpde->parent=parent;
   newpde->next=parent->subdir;
-  acquire(&(parent->lock));
+  acquire(&pdetable.lock);
   parent->subdir=newpde;
-  release(&(parent->lock));
+  release(&pdetable.lock);
   return newpde;
 }
 
@@ -119,7 +119,6 @@ struct proc_dir_entry *proc_lookup(const char *name)//识别绝对和相对路�
     }
     if(!findFlag)
     {
-      cprintf("file not found!");
       return 0;
     }
     currentIndex = nextIndex;

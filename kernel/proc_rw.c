@@ -82,6 +82,8 @@ read_cpuinfo(char *page, void *data)
     off=off+read_line(page,"Local APIC ID:",(int)(cpus[i].apicid),off);
     off=off+read_line(page,"The currently-running process ID:",(cpus[i].proc)->pid,off);
   }
+  page[off]=0;
+  off++;
   return off;
 }
 //读文件夹
@@ -105,6 +107,8 @@ read_dir_list(char *page,void *data)
       off+=7;
     }
   }
+  page[off]=0;
+  off++;
   return off;
 }
 //读某proc文件
@@ -122,15 +126,15 @@ int read_proc(char*name, char *page)
   struct proc_dir_entry*s=proc_lookup(name);
   if(s==0)
   {
-    cprintf("proc file not exist");
+    cprintf("proc file not exist\n");
     return -1;
   }
-  int n=read_proc_file(s,page);
-  if(s==-1)
+  read_proc_file(s,page);
+  /*if(n==-1)
   {
     cprintf("proc file read failed");
     return -1;
-  }
+  }*/
 }
 
 

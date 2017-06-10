@@ -23,12 +23,12 @@ struct proc_dir_entry
 
 struct proc_cmd{
   int type;
-  char *filepath;
+  char filepath[30];
 };
 
 struct {
     struct spinlock lock;
-    struct pde pde[NPDE];
+    struct proc_dir_entry pde[NPDE];
 } pdetable;
 
 struct proc_dir_entry *root;
@@ -56,7 +56,7 @@ void  proc_init(void);
 
 //proc cmd
 void exec_proc_cmd(char* buf);
-struct proc_cmd* parse_proc_cmd(char* buf);
+void parse_proc_cmd(char* buf,struct proc_cmd*cmd);
 void plist_cmd(char* path);
 void pcd_cmd(char* path);
 void pcat_cmd(char* path);
