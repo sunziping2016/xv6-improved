@@ -3,6 +3,7 @@
 
 #include "xv6/spinlock.h"
 
+#define NPDE 100
 typedef int(*read_proc_t)(char *page,void *data);
 
 int procfs;
@@ -12,19 +13,23 @@ enum pdetype{PDE_NONE,PDE_DIR,PDE_FILE};
 struct proc_dir_entry
 {
   unsigned short namelen;
-  const char *name;
+  char name[20];
   enum pdetype type;
   struct proc_dir_entry *next, *parent, *subdir;
   void *data;
   read_proc_t *read_proc;
   //write_proc_t *write_proc;
-  struct spinlock lock;
 };
 
 struct proc_cmd{
   int type;
   char *filepath;
 };
+
+struct {
+    struct spinlock lock;
+    struct pde pde[NPDE];
+} pdetable;
 
 struct proc_dir_entry *root;
 struct proc_dir_entry *now;
