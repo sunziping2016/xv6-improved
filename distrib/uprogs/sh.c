@@ -55,7 +55,7 @@ void panic(char*);
 struct cmd *parsecmd(char*);
 
 // Execute cmd.  Never returns.
-void 
+void
 runcmd(struct cmd *cmd)
 {
     int p[2];
@@ -167,9 +167,9 @@ main(void)
             // Chdir must be called by the parent, not the child.
             buf[strlen(buf) - 1] = 0; // chop \n
             if (buf[3] == 'p' && buf[4] == 'r' && buf[5] == 'o' && buf[6] == 'c') {
-                procfs = 1; 
+                procfs = 1;
                 continue;
-            }   
+            }
             if (chdir(buf + 3) < 0)
                 printf(2, "cannot cd %s\n", buf + 3);
             continue;
