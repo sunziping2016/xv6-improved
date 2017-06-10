@@ -1,10 +1,10 @@
 #include "xv6/user.h"
-#include "internal.h"
+#include "xv6/proc_fs.h"
 #define NPDE 100
 
-struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)//插入顺序待改
+struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype type,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)//插入顺序待改
 {
-  if(parent.pdetype!=1)
+  if(parent->type!=PDE_DIR)
     return 0;
   struct proc_dir_entry*newpde=parent;
   //search if exist
@@ -16,29 +16,31 @@ struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype,struct proc_dir
   }
   //alloc
   unsigned short len=strlen(name);
-  if((newpde=(struct proc_dir_entry*)malloc(sizeof(struct proc_dir_entry)+len+1))==0)
+  void*p;
+  if((p=malloc(sizeof(struct proc_dir_entry)+len+1))==0)
     return 0;
-  newpde->name=(char*)(newpde+sizeof(struct proc_dir_entry));
+  newpde=(struct proc_dir_entry*)p;
+  newpde->name=(char*)(p+sizeof(struct proc_dir_entry));
   //init
   strcpy(newpde->name,name);
-  newpde->namelen=len
-  newpde->pdetype=pdetype;
+  newpde->namelen=len;
+  newpde->type=type;
   newpde->data=data;
   newpde->read_proc=read_proc;
   //newpde.write_proc=write_proc;
   //insert
   newpde->subdir=0;
   newpde->parent=parent;
-  newpde->next=parent.subdir;
-  acquire(&parent.lock);
+  newpde->next=parent->subdir;
+  acquire(&(parent->lock));
   parent->subdir=newpde;
-  release(&parent.lock);
+  release(&(parent->lock));
   return newpde;
 }
 
 void _add_(struct proc_dir_entry *pde)
 {
-  if(pde->pdetype==PDE_DIR&&strcmp(pde->name,".")!=0&&strcmp(pde->name,"..")!=0)
+  if(pde->type==PDE_DIR&&strcmp(pde->name,".")!=0&&strcmp(pde->name,"..")!=0)
   {
     struct proc_dir_entry *self=proc_mkdir(".",PDE_DIR,pde,pde,pde->read_proc);
     self->subdir=pde->subdir;
@@ -46,16 +48,16 @@ void _add_(struct proc_dir_entry *pde)
     parent->subdir=pde->parent->subdir;
   }
 }
-struct proc_dir_entry *proc_mkdir(const char *name,enum pdetype,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)
+struct proc_dir_entry *proc_mkdir(const char *name,enum pdetype type,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)
 {
-  struct proc_dir_entry *n=_proc_mkdir(name,pdetype,parent,data,read_proc);
-  if(pdetype==PDE_DIR)
+  struct proc_dir_entry *n=_proc_mkdir(name,type,parent,data,read_proc);
+  if(type==PDE_DIR)
     _add_(n);
 }
 
 void remove_proc_entry(const char *name, struct proc_dir_entry *parent)//非递归
 {
-  struct proc_dir_entry*p=parent.subdir;
+  struct proc_dir_entry*p=parent->subdir;
   struct proc_dir_entry*q=0;
   while(p!=0)
   {
@@ -66,17 +68,17 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)//非递�
   }
   return;
   found:
-  acquire(&p.lock);
+  acquire(&(p->lock));
   if(q==0)
   {
-    acquire(&parent.lock);
+    acquire(&(parent->lock));
     parent->subdir=p->next;
-    release(&parent.lock);
+    release(&(parent->lock));
   }
   else {
-    acquire(&parent.lock);
+    acquire(&(parent->lock));
     q->next=p->next;
-    release(&q.lock);
+    release(&(q->lock));
   }
   free(p->name);
   free(p);
@@ -88,13 +90,13 @@ struct proc_dir_entry *proc_lookup(const char *name)//识别绝对和相对路�
     return;
   int currentIndex = 0;
   int nextIndex = 1;
-  struct proc_dir_entry* currentPDE = proc_root;
-  bool findFlag = false;
+  struct proc_dir_entry* currentPDE = root;
+  unsigned short findFlag = 0;
   while(name[currentIndex] == '/')
   {
     while(name[nextIndex] != '/' && name[nextIndex] != '\0')
       nextIndex++;
-    while(currentPDE != NULL)
+    while(currentPDE != 0)
     {
       if(currentPDE->namelen != nextIndex - currentIndex - 1)
       {
@@ -103,13 +105,13 @@ struct proc_dir_entry *proc_lookup(const char *name)//识别绝对和相对路�
       }
       for(int i = currentIndex + 1; i < nextIndex; ++i)
       {
-        if(path[i] != currentPDE->name[i - currentIndex - 1])
+        if(name[i] != currentPDE->name[i - currentIndex - 1])
         {
           currentPDE = currentPDE->next;
           continue;
         }
       }
-      findFlag = true;
+      findFlag = 1;
       currentPDE = currentPDE->subdir;
       break;
     }

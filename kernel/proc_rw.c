@@ -1,8 +1,9 @@
 ﻿#include "xv6/defs.h"
 #include "xv6/proc.h"
-#include "internal.h"
+#include "xv6/proc_fs.h"
 
-int num_to_str(char*str,unsigned int num,unsigned int offset)
+int 
+num_to_str(char*str,unsigned int num,unsigned int offset)
 {
   char numstr[20]="0";
   int len=0;
@@ -18,17 +19,20 @@ int num_to_str(char*str,unsigned int num,unsigned int offset)
   return len;
 }
 
-int proc_dir_to_str(char*str,unsigned short slen,struct proc_dir_entry*dir,unsigned short offset)
+int 
+proc_dir_to_str(char*str,unsigned short slen,struct proc_dir_entry*dir,unsigned short offset)
 {
   
 }
 
-int inode_dir_to_str(char*str,unsigned short slen,struct inode*dir,unsigned short offset)
+int 
+inode_dir_to_str(char*str,unsigned short slen,struct inode*dir,unsigned short offset)
 {
   
 }
 
-int read_line(char*page,const char*desc,unsigned int num,unsigned int off) 
+int 
+read_line(char*page,const char*desc,unsigned int num,unsigned int off) 
 {
   int len=0;
   len+=strlen(desc);
@@ -39,7 +43,8 @@ int read_line(char*page,const char*desc,unsigned int num,unsigned int off)
   return len;
 }
 
-int read_proc_stat(char *page,void *data)
+int 
+read_proc_stat(char *page,void *data)
 {
   int n=0;
   /*
@@ -54,7 +59,8 @@ int read_proc_stat(char *page,void *data)
   return n;
 }
 
-int read_cpuinfo(char *page, void *data)
+int 
+read_cpuinfo(char *page, void *data)
 {
   /*
   uchar apicid;                // Local APIC ID
@@ -72,21 +78,22 @@ int read_cpuinfo(char *page, void *data)
   int off=0;
   for(int i=0;i<ncpu;i++)
   {
-    off+=read_line("Local APIC ID:",(int)(cpus[i].apicid),off);
-    off+=read_line("The currently-running process ID:",(cpus[i].proc)->pid,off);
+    off=off+read_line(page,"Local APIC ID:",(int)(cpus[i].apicid),off);
+    off=off+read_line(page,"The currently-running process ID:",(cpus[i].proc)->pid,off);
   }
   return off;
 }
 //读文件夹
-int read_dir_list(char *page,void *data)
+int 
+read_dir_list(char *page,void *data)
 {
   int off=0;
-  struct proc_dir_entry*p=(struct proc_dir_entry*)data->subdir;
+  struct proc_dir_entry*p=((struct proc_dir_entry*)data)->subdir;
   while(p!=0)
   {
     strcpy(page+off,p->name);
     off+=p->namelen;
-    if(p->pdetype==PDE_DIR)
+    if(p->type==PDE_DIR)
     {
       strcpy(page+off,"  DIR\n");
       off+=6;
@@ -100,23 +107,24 @@ int read_dir_list(char *page,void *data)
   return off;
 }
 //读某proc文件
-int read_proc_file(struct proc_dir_entry *f, char *page)
+int 
+read_proc_file(struct proc_dir_entry *f, char *page)
 {
-  if(f.pdetype==PDE_NONE)
+  if(f->type==PDE_NONE)
     return -1;
-  else return f.read_proc(page,f.data);
+  else return (*(f->read_proc))(page,f->data);
 }
 
-int read_proc(char*name,char *page)
+int read_proc(char*name, char *page)
 {
-  proc_update();
+  //proc_update();
   struct proc_dir_entry*s=proc_lookup(name);
   if(s==0)
   {
     cprintf("proc file not exist");
     return -1;
   }
-  int n=read_proc_file(s, char *page);
+  int n=read_proc_file(s,page);
   if(s==-1)
   {
     cprintf("proc file read failed");
