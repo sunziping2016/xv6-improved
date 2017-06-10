@@ -1,5 +1,5 @@
 #include "xv6/proc_fs.h"
-#include "xv6/defs.h"
+#include "xv6/user.h"
 
 #define pList 0
 #define pCd 1
@@ -8,32 +8,29 @@
 
 void exec_proc_cmd(char* buf)
 {	
-  struct proc_cmd* cmd;
-	cmd = parse_proc_cmd(buf);
-	switch(cmd->type)
+  struct proc_cmd cmd;
+	parse_proc_cmd(buf,&cmd);
+	switch(cmd.type)
 	{
 		case pList:
-			plist_cmd(cmd->filepath);
+			plist_cmd(cmd.filepath);
 			break;
 
 		case pCd:
-			pcd_cmd(cmd->filepath);
+			pcd_cmd(cmd.filepath);
 			break;
 
 		case pCat:
-			pcat_cmd(cmd->filepath);
+			pcat_cmd(cmd.filepath);
 			break;
 
 		default:
 			cprintf("Can not resolve cmd");
 	}
-  kfree((char*)cmd->filepath);
-  kfree((char*)cmd);
 }
 
-struct proc_cmd* parse_proc_cmd(char* buf)
+void parse_proc_cmd(char* buf,struct proc_cmd*cmd)
 {
-  struct proc_cmd *cmd = (struct proc_cmd*)kalloc();
   int i = 0, len = strlen(buf);
   while(buf[i] == ' ')
     i++;
@@ -47,8 +44,7 @@ struct proc_cmd* parse_proc_cmd(char* buf)
   else
   {
     cmd->type = pNothing;
-    cmd->filepath = 0;
-    return cmd;
+    return;
   }
 
   while(buf[i] != ' ')
@@ -56,11 +52,9 @@ struct proc_cmd* parse_proc_cmd(char* buf)
   while(buf[i] == ' ')
     i++;
   int content_len = len - i;
-  cmd->filepath = kalloc();
+
   for(int j = 0; j < content_len; j++)
     cmd->filepath[j] = buf[i+j];
-
-  return cmd;
 }
 
 void plist_cmd(char* path)
@@ -70,10 +64,10 @@ void plist_cmd(char* path)
 		path[0] = '.';
   char* page;
   page = kalloc();
-	if(!page)
+	if(page)
 	{
-		read_proc(path, page);
-		printf(2, "%s", page);
+		if(read_proc(path, page)!=-1)
+      cprintf("%s", page);
 	}
 
 }
