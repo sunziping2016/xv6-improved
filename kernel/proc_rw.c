@@ -35,10 +35,11 @@ int
 read_line(char*page,const char*desc,unsigned int num,unsigned int off) 
 {
   int len=0;
-  len+=strlen(desc);
-  strcpy(page+off,desc);
+  int l=strlen(desc);
+  len+=l;
+  safestrcpy(page+off,desc,l);
   len+=num_to_str(page,num,off+len);
-  strcpy(page+off+len,"\n");
+  safestrcpy(page+off+len,"\n",1);
   len++;
   return len;
 }
@@ -81,6 +82,8 @@ read_cpuinfo(char *page, void *data)
     off=off+read_line(page,"Local APIC ID:",(int)(cpus[i].apicid),off);
     off=off+read_line(page,"The currently-running process ID:",(cpus[i].proc)->pid,off);
   }
+  page[off]=0;
+  off++;
   return off;
 }
 //读文件夹
@@ -91,19 +94,21 @@ read_dir_list(char *page,void *data)
   struct proc_dir_entry*p=((struct proc_dir_entry*)data)->subdir;
   while(p!=0)
   {
-    strcpy(page+off,p->name);
+    safestrcpy(page+off,p->name,p->namelen);
     off+=p->namelen;
     if(p->type==PDE_DIR)
     {
-      strcpy(page+off,"  DIR\n");
+      safestrcpy(page+off,"  DIR\n",6);
       off+=6;
     }
     else 
     {
-      strcpy(page+off,"  FILE\n");
+      safestrcpy(page+off,"  FILE\n",7);
       off+=7;
     }
   }
+  page[off]=0;
+  off++;
   return off;
 }
 //读某proc文件
@@ -121,15 +126,15 @@ int read_proc(char*name, char *page)
   struct proc_dir_entry*s=proc_lookup(name);
   if(s==0)
   {
-    cprintf("proc file not exist");
+    cprintf("proc file not exist\n");
     return -1;
   }
-  int n=read_proc_file(s,page);
-  if(s==-1)
+  read_proc_file(s,page);
+  /*if(n==-1)
   {
     cprintf("proc file read failed");
     return -1;
-  }
+  }*/
 }
 
 

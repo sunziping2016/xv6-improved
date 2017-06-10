@@ -4,10 +4,8 @@
 void  proc_root_init(void)
 {
   procfs = 0;
-  void*p=malloc(sizeof(struct proc_dir_entry)+5);
-  root=(struct proc_dir_entry*)p;
-  root->name=(char*)(p+sizeof(struct proc_dir_entry));
-  strcpy(root->name,"proc");
+  root=pde_alloc(PDE_DIR);
+  safestrcpy(root->name,"proc",5);
   root->namelen=4;
   root->type=PDE_DIR;
   root->data=0;
