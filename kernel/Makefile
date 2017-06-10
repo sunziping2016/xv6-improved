@@ -34,6 +34,10 @@ OBJS = \
 	trapasm.o\
 	vectors.o\
 	vm.o\
+	proc_cmd.o\
+	proc_generic.o\
+	proc_init.o\
+	proc_rw.o\
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 
