@@ -120,11 +120,11 @@ read_proc_file(struct proc_dir_entry *f, char *page)
   else return (*(f->read_proc))(page,f->data);
 }
 
-int read_proc(char*name, char *page)
+int read_proc(char *name, char *page)
 {
   //proc_update();
-  struct proc_dir_entry*s=proc_lookup(name);
-  if(s==0)
+  struct proc_dir_entry *s = proc_lookup(name);
+  if(s == 0)
   {
     cprintf("proc file not exist\n");
     return -1;
@@ -135,6 +135,17 @@ int read_proc(char*name, char *page)
     cprintf("proc file read failed");
     return -1;
   }*/
+}
+
+int list_proc(char* name)
+{
+  struct proc_dir_entry* f = proc_lookup(name);
+  f = f->subdir;
+  while(f != 0)
+  {
+    cprintf("%s %d\n", f->name, (int)f->type);
+    f = f->next;
+  }
 }
 
 

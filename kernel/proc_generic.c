@@ -94,9 +94,10 @@ struct proc_dir_entry *proc_lookup(const char *name)//识别绝对和相对路�
   int nextIndex = 1;
   struct proc_dir_entry* currentPDE = root;
   unsigned short findFlag = 0;
+  uint length = strlen(name);
   while(name[currentIndex] == '/')
   {
-    while(name[nextIndex] != '/' && name[nextIndex] != '\0')
+    while(name[nextIndex] != '/' && nextIndex < length)
       nextIndex++;
     while(currentPDE != 0)
     {
@@ -105,26 +106,25 @@ struct proc_dir_entry *proc_lookup(const char *name)//识别绝对和相对路�
         currentPDE = currentPDE->next;
         continue;
       }
-      for(int i = currentIndex + 1; i < nextIndex; ++i)
+      if(strncmp(currentPDE->name, name + currentIndex + 1, currentPDE->namelen) == 0)
       {
-        if(name[i] != currentPDE->name[i - currentIndex - 1])
-        {
-          currentPDE = currentPDE->next;
-          continue;
-        }
+        findFlag = 1;
+        break;
       }
-      findFlag = 1;
-      currentPDE = currentPDE->subdir;
-      break;
+      currentPDE = currentPDE->next;
     }
     if(!findFlag)
     {
       return 0;
     }
+    if(nextIndex >= length)
+      return currentPDE;
+    currentPDE = currentPDE->subdir;
     currentIndex = nextIndex;
     nextIndex++;
   }
   return currentPDE;
 }
+
 //proc_root_lookup proc_lookup proc_pid_lookup 
 

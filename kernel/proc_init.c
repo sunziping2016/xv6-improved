@@ -1,7 +1,7 @@
 ﻿#include "xv6/proc.h"
 #include "xv6/proc_fs.h"
 
-void  proc_root_init(void)
+void proc_root_init(void)
 {
   procfs = 0;
   root=pde_alloc(PDE_DIR);
@@ -16,11 +16,11 @@ void  proc_root_init(void)
   root->parent=root;
   root->next=0;
 }
-void  proc_cpuinfo_init(void)
+void proc_cpuinfo_init(void)
 {
   proc_mkdir("cpuinfo",PDE_FILE,root, 0, read_cpuinfo);
 }
-void  proc_process_init(struct proc*process)
+void proc_process_init(struct proc*process)
 {
   char numstr[10];
   num_to_str(numstr,process->pid,0);
@@ -33,7 +33,7 @@ void proc_update()
   
 }
 */
-void  proc_init(void)
+void proc_init(void)
 {
   proc_root_init();
   proc_cpuinfo_init();

@@ -4,6 +4,8 @@
 #include "xv6/spinlock.h"
 
 #define NPDE 100
+#define PROC_CMDLEN 32
+
 typedef int(*read_proc_t)(char *page,void *data);
 
 int procfs;
@@ -23,7 +25,7 @@ struct proc_dir_entry
 
 struct proc_cmd{
   int type;
-  char filepath[30];
+  char filepath[PROC_CMDLEN];
 };
 
 struct {

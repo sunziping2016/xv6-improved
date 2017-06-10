@@ -9,24 +9,24 @@
 void exec_proc_cmd(char* buf)
 {	
   struct proc_cmd cmd;
-	parse_proc_cmd(buf,&cmd);
-	switch(cmd.type)
-	{
-		case pList:
-			plist_cmd(cmd.filepath);
-			break;
+  parse_proc_cmd(buf,&cmd);
+  switch(cmd.type)
+  {
+	case pList:
+		plist_cmd(cmd.filepath);
+		break;
 
-		case pCd:
-			pcd_cmd(cmd.filepath);
-			break;
+	case pCd:
+		pcd_cmd(cmd.filepath);
+		break;
 
-		case pCat:
-			pcat_cmd(cmd.filepath);
-			break;
+	case pCat:
+	    pcat_cmd(cmd.filepath);
+		break;
 
-		default:
-			cprintf("Can not resolve cmd");
-	}
+	default:
+		cprintf("Can not resolve cmd\n");
+  }
 }
 
 void parse_proc_cmd(char* buf,struct proc_cmd*cmd)
@@ -52,24 +52,17 @@ void parse_proc_cmd(char* buf,struct proc_cmd*cmd)
   while(buf[i] == ' ')
     i++;
   int content_len = len - i;
-
-  for(int j = 0; j < content_len; j++)
+  int read_len = content_len <= PROC_CMDLEN - 1 ? content_len : PROC_CMDLEN - 1;
+  for(int j = 0; j < read_len; j++)
     cmd->filepath[j] = buf[i+j];
+  cmd->filepath[read_len] = '\0';
 }
 
 void plist_cmd(char* path)
 {
-	uint len = strlen(path);
-	if(len == 0)
+	if(path[0] == '\0')
 		path[0] = '.';
-  char* page;
-  page = kalloc();
-	if(page)
-	{
-		if(read_proc(path, page)!=-1)
-      cprintf("%s", page);
-	}
-
+    list_proc(path);
 }
 
 void pcd_cmd(char* path)
@@ -82,5 +75,15 @@ void pcd_cmd(char* path)
 
 void pcat_cmd(char* path)
 {
+	char *page;
+	page = kalloc();
+	if(page)
+	{
+		if(read_proc(path, page) != -1)
+		{
+			cprintf("%s", page);
+		}	
+	}
+	
 
 }

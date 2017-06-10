@@ -165,6 +165,7 @@ main(void)
     while (getcmd(buf, sizeof(buf)) >= 0) {
         if(procfs)
         {
+          buf[strlen(buf) - 1] = 0; 
           proccmd(buf);
           continue;
         }
