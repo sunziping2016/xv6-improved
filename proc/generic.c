@@ -1,49 +1,65 @@
-#include "internal.h"
 #include "xv6/user.h"
 #include "internal.h"
 #define NPDE 100
 
-struct proc_dir_entry *proc_mkdir(const char *name,enum pdetype,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)//插入顺序待改
+struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)//插入顺序待改
 {
   if(parent.pdetype!=1)
     return 0;
-  proc_dir_entry*newpde=parent;
+  struct proc_dir_entry*newpde=parent;
   //search if exist
   while(newpde!=0)
   {
-    if(strcmp(newpde.name,name)==0)
+    if(strcmp(newpde->name,name)==0)
       return 0;
     newpde=newpde->next;
   }
   //alloc
-  unsigned short len=strlen(newpde.name);
-  if((newpde=(proc_dir_entry*)malloc(sizeof(struct proc_dir_entry)+len+1))==0)
+  unsigned short len=strlen(name);
+  if((newpde=(struct proc_dir_entry*)malloc(sizeof(struct proc_dir_entry)+len+1))==0)
     return 0;
-  newpde.name=newpde+sizeof(struct proc_dir_entry);
+  newpde->name=(char*)(newpde+sizeof(struct proc_dir_entry));
   //init
-  strcpy(newpde.name,name);
-  newpde.namelen=len
-  newpde.pdetype=pdetype;
-  newpde.data=data;
-  newpde.read_proc=read_proc;
+  strcpy(newpde->name,name);
+  newpde->namelen=len
+  newpde->pdetype=pdetype;
+  newpde->data=data;
+  newpde->read_proc=read_proc;
   //newpde.write_proc=write_proc;
   //insert
-  newpde.subdir=0;
-  newpde.parent=parent;
-  newpde.next=parent.subdir;
+  newpde->subdir=0;
+  newpde->parent=parent;
+  newpde->next=parent.subdir;
   acquire(&parent.lock);
-  parent.subdir=newpde;
+  parent->subdir=newpde;
   release(&parent.lock);
   return newpde;
 }
 
+void _add_(struct proc_dir_entry *pde)
+{
+  if(pde->pdetype==PDE_DIR&&strcmp(pde->name,".")!=0&&strcmp(pde->name,"..")!=0)
+  {
+    struct proc_dir_entry *self=proc_mkdir(".",PDE_DIR,pde,pde,pde->read_proc);
+    self->subdir=pde->subdir;
+    struct proc_dir_entry *parent=proc_mkdir("..",PDE_DIR,pde,pde->parent,pde->parent->read_proc);
+    parent->subdir=pde->parent->subdir;
+  }
+}
+struct proc_dir_entry *proc_mkdir(const char *name,enum pdetype,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)
+{
+  struct proc_dir_entry *n=_proc_mkdir(name,pdetype,parent,data,read_proc);
+  if(pdetype==PDE_DIR)
+    _add_(n);
+}
+
 void remove_proc_entry(const char *name, struct proc_dir_entry *parent)//非递归
 {
-  proc_dir_entry*p=parent.subdir;
-  proc_dir_entry*q=0;
+  struct proc_dir_entry*p=parent.subdir;
+  struct proc_dir_entry*q=0;
   while(p!=0)
   {
-    if(strcmp(p.name,name)==0)
+    if(strcmp(p->name,name)==0)
       goto found;
     q=p;
     p=p->next;
@@ -54,7 +70,7 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)//非递�
   if(q==0)
   {
     acquire(&parent.lock);
-    parent.subdir=p->next;
+    parent->subdir=p->next;
     release(&parent.lock);
   }
   else {
@@ -62,7 +78,7 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)//非递�
     q->next=p->next;
     release(&q.lock);
   }
-  free(p.name);
+  free(p->name);
   free(p);
 }
 
@@ -72,7 +88,7 @@ struct proc_dir_entry *proc_lookup(const char *name)//识别绝对和相对路�
     return;
   int currentIndex = 0;
   int nextIndex = 1;
-  proc_dir_entry* currentPDE = proc_root;
+  struct proc_dir_entry* currentPDE = proc_root;
   bool findFlag = false;
   while(name[currentIndex] == '/')
   {

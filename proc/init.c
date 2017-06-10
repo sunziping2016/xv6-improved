@@ -2,8 +2,18 @@
 #include "internal.h"
 void  proc_root_init(void)
 {
-  root=(proc_dir_entry*)malloc(sizeof(struct proc_dir_entry)+len+1);
-  
+  root=(struct proc_dir_entry*)malloc(sizeof(struct proc_dir_entry)+5);
+  root->name=(char*)(root+sizeof(struct proc_dir_entry));
+  strcpy(root->name,"proc");
+  root->namelen=4
+  root->pdetype=PDE_DIR
+  root->data=0;
+  root->read_proc=read_dir_list;
+  //newpde.write_proc=write_proc;
+  //insert
+  root->subdir=0;
+  root->parent=root;
+  root->next=0;
 }
 void  proc_cpuinfo_init(void)
 {
@@ -13,7 +23,7 @@ void  proc_process_init(proc*process)
 {
   char numstr[10];
   num_to_str(numstr,10,process.pid,0);
-  proc_dir_entry*proc_dir=proc_mkdir(numstr,PDE_DIR,root,process,read_dir_list);
+  struct proc_dir_entry*proc_dir=proc_mkdir(numstr,PDE_DIR,root,process,read_dir_list);
   proc_mkdir("status",PDE_FILE,proc_dir,process,read_proc_stat);
 }
 
