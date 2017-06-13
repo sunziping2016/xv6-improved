@@ -26,14 +26,25 @@ int uptime(void);
 
 // ulib.c
 int stat(char*, struct stat*);
-char* strcpy(char*, char*);
-void *memmove(void*, void*, int);
-char* strchr(const char*, char c);
-int strcmp(const char*, const char*);
 void printf(int, char*, ...);
 char* gets(char*, int max);
-uint strlen(char*);
 void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+
+uint strlen(const char *str);
+char * strchr(register const char *p, register const char ch);
+char *strrchr(register const char *p, register const char *ch);
+char *strcat(register char *s, register const char *append);
+char *strncat(char *dst, const char *src, register uint n);
+int strcmp(register const char *s1, register const char *s2);
+int strncmp(register const char *s1, register const char *s2, register uint n);
+char* strcpy(register char *to, register const char *from);
+char *strncpy(char *dst, const char *src, register uint n);
+char *strstr(register const char *s, register const char *find);
+void *memcpy(void *dst0, const void *src0, register uint length);
+void *memccpy(void *t, const void *f, int c, register uint n);
+void *memchr(const void *s, register unsigned char c, register uint n);
+int memcmp(const void *s1, const void *s2, uint n);
