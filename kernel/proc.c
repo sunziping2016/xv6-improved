@@ -48,6 +48,8 @@ static struct proc *allocproc(void)
 found:
     p->state = EMBRYO;
     p->pid = nextpid++;
+    p->ustack = 0;
+    p->mthread = 1;
 
     release(&ptable.lock);
 
@@ -154,6 +156,53 @@ int fork(void)
     }
     np->sz = proc->sz;
     np->parent = proc;
+    np->ustack = proc->ustack;
+    *np->tf = *proc->tf;
+
+    // Clear %eax so that fork returns 0 in the child.
+    np->tf->eax = 0;
+
+    for (i = 0; i < NOFILE; i++)
+        if (proc->ofile[i])
+            np->ofile[i] = filedup(proc->ofile[i]);
+    np->cwd = idup(proc->cwd);
+
+    safestrcpy(np->name, proc->name, sizeof(proc->name));
+
+    pid = np->pid;
+
+    acquire(&ptable.lock);
+
+    np->state = RUNNABLE;
+
+    release(&ptable.lock);
+
+    return pid;
+}
+
+// Create a new thread.
+int thread_create(void)
+{
+    int i, pid;
+    struct proc *np;
+
+    // Allocate process.
+    if ((np = allocproc()) == 0) {
+        return -1;
+    }
+
+    // Copy process state from p.
+    if ((np->pgdir = copystackuvm(proc->pgdir, proc->sz, proc->ustack)) == 0) {
+        kfree(np->kstack);
+        np->kstack = 0;
+        np->state = UNUSED;
+        return -1;
+    }
+    np->sz = proc->sz;
+    // TODO: parent should be the main thread.
+    np->parent = proc;
+    np->ustack = proc->ustack;
+    np->mthread = 0;
     *np->tf = *proc->tf;
 
     // Clear %eax so that fork returns 0 in the child.
@@ -180,8 +229,9 @@ int fork(void)
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
 // until its parent calls wait() to find out it exited.
-void
-exit(void)
+// TODO: It should exit all the threads the process has.
+// TODO: There should be an extra function `thread_exit`.
+void exit(void)
 {
     struct proc *p;
     int fd;
@@ -224,8 +274,7 @@ exit(void)
 
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
-int
-wait(void)
+int wait(void)
 {
     struct proc *p;
     int havekids, pid;
@@ -243,7 +292,12 @@ wait(void)
                 pid = p->pid;
                 kfree(p->kstack);
                 p->kstack = 0;
-                freevm(p->pgdir);
+                if (p->mthread)
+                    freevm(p->pgdir);
+                else
+                    freestackvm(p->pgdir, p->ustack);
+                p->mthread = 1;
+                p->ustack = 0;
                 p->pid = 0;
                 p->parent = 0;
                 p->name[0] = 0;
@@ -448,8 +502,7 @@ kill(int pid)
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
-void
-procdump(void)
+void procdump(void)
 {
     static char *states[] = {
         [UNUSED]    "unused",

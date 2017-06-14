@@ -7,8 +7,9 @@
 #include "xv6/x86.h"
 #include "xv6/elf.h"
 
-int
-exec(char *path, char **argv)
+// TODO: What if it's called from a non-main thread
+// It may be better to do nothing and return an error.
+int exec(char *path, char **argv)
 {
     char *s, *last;
     int i, off;
@@ -97,6 +98,8 @@ exec(char *path, char **argv)
     proc->sz = sz;
     proc->tf->eip = elf.entry;  // main
     proc->tf->esp = sp;
+    proc->ustack = sz;
+    proc->mthread = 1;
     switchuvm(proc);
     freevm(oldpgdir);
     return 0;

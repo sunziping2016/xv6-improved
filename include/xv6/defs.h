@@ -182,5 +182,8 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
+void            freestackvm(pde_t *pgdir, uint stack);
+pde_t*          copystackuvm(pde_t *pgdir, uint sz, uint stack);
+
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
