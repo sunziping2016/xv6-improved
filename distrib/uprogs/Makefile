@@ -19,7 +19,7 @@ $(OUTDIR)/%.o: %.c | $(OUTDIR)
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 $(OUTDIR)/%: $(OUTDIR)/%.o $(ULIB) | $(OUTDIR)
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
+	$(LD) $(LDFLAGS) -s -N -e main -Ttext 0 -o $@ $^
 
 install: $(_UPROGS)
 	mkdir -p $(TOP_SRCDIR)/build/fs
