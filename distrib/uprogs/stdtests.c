@@ -1,5 +1,5 @@
-#include "xv6/types.h"
-#include "xv6/user.h"
+#include <xv6/user.h>
+#include <stdio.h>
 
 volatile int count = 0;
 

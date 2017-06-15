@@ -18,5 +18,6 @@ void *memmove(void *vdst, const void *vsrc, register unsigned int n);
 void *memccpy(void *t, const void *f, int c, register unsigned int n);
 void *memchr(const void *s, register unsigned char c, register unsigned int n);
 int memcmp(const void *s1, const void *s2, unsigned int n);
+void* memset(void*, int, unsigned int);
 
 #endif

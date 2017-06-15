@@ -32,25 +32,4 @@ int setcurpos(int);
 int stat(char*, struct stat*);
 void printf(int, char*, ...);
 char* gets(char*, int max);
-void* memset(void*, int, uint);
-void* malloc(uint);
-void free(void*);
 int atoi(const char*);
-
-#define EOF  (-1)
-
-// stdio.h
-typedef struct {
-    int fd;
-} FILE;
-
-extern FILE _std_files[];
-
-#define stdin (&_std_files[0])
-#define stdout (&_std_files[1])
-
-extern int myprintf(char const *fmt, ...);
-
-#include <stdarg.h>
-
-#define	HUGE_VAL	1.701411834604692294E+38
