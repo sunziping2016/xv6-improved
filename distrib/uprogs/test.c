@@ -13,12 +13,12 @@ int main(int argc, char *argv[])
         ++count;
         sleep(10);
         printf(1, "parent: count = %d, %x\n", count, &count);
-        wait();
+        thread_wait();
         exit();
     } else if (pid == 0) {
         printf(1, "child: count = %d, %x\n", count, &count);
         ++count;
         printf(1, "child: count = %d, %x\n", count, &count);
-        exit();
+        thread_exit();
     }
 }

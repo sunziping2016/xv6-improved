@@ -199,8 +199,14 @@ int thread_create(void)
         return -1;
     }
     np->sz = proc->sz;
-    // TODO: parent should be the main thread.
-    np->parent = proc;
+    if (proc->mthread)
+    {
+        np->parent = proc;
+    }
+    else
+    {
+        np->parent = proc->parent;
+    }
     np->ustack = proc->ustack;
     np->mthread = 0;
     *np->tf = *proc->tf;
@@ -229,10 +235,12 @@ int thread_create(void)
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
 // until its parent calls wait() to find out it exited.
-// TODO: It should exit all the threads the process has.
-// TODO: There should be an extra function `thread_exit`.
 void exit(void)
 {
+    // Only main thread can call this.
+    if (!proc->mthread)
+        panic("exit: mthread type error");
+
     struct proc *p;
     int fd;
 
@@ -254,6 +262,12 @@ void exit(void)
 
     acquire(&ptable.lock);
 
+    // Exit all the threads the process has.
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if ((p->parent == proc) && (!p->mthread))
+             p->state = ZOMBIE;
+    }
+
     // Parent might be sleeping in wait().
     wakeup1(proc->parent);
 
@@ -272,8 +286,26 @@ void exit(void)
     panic("zombie exit");
 }
 
-// Wait for a child process to exit and return its pid.
-// Return -1 if this process has no children.
+// Exit the current thread.
+void thread_exit(void)
+{
+    // Only non-main thread can call this.
+    if (proc->mthread)
+        panic("thread_exit: mthread type error");
+
+    acquire(&ptable.lock);
+
+    // Parent might be sleeping in wait().
+    wakeup1(proc->parent);
+
+    // Jump into the scheduler, never to return.
+    proc->state = ZOMBIE;
+    sched();
+    panic("zombie exit");
+}
+
+// Wait for a child process (main thread) to exit and return its pid.
+// Return -1 if this process has no children (main thread).
 int wait(void)
 {
     struct proc *p;
@@ -281,10 +313,10 @@ int wait(void)
 
     acquire(&ptable.lock);
     for (;;) {
-        // Scan through table looking for exited children.
+        // Scan through table looking for exited children (main thread).
         havekids = 0;
         for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-            if (p->parent != proc)
+            if ((!p->mthread) || (p->parent != proc))
                 continue;
             havekids = 1;
             if (p->state == ZOMBIE) {
@@ -292,10 +324,7 @@ int wait(void)
                 pid = p->pid;
                 kfree(p->kstack);
                 p->kstack = 0;
-                if (p->mthread)
-                    freevm(p->pgdir);
-                else
-                    freestackvm(p->pgdir, p->ustack);
+                freevm(p->pgdir);
                 p->mthread = 1;
                 p->ustack = 0;
                 p->pid = 0;
@@ -308,7 +337,51 @@ int wait(void)
             }
         }
 
-        // No point waiting if we don't have any children.
+        // No point waiting if we don't have any children (main thread).
+        if (!havekids || proc->killed) {
+            release(&ptable.lock);
+            return -1;
+        }
+
+        // Wait for children to exit.  (See wakeup1 call in proc_exit.)
+        sleep(proc, &ptable.lock);  //DOC: wait-sleep
+    }
+}
+
+// Wait for a child process (non-main thread) to exit and return its pid.
+// Return -1 if this process has no children (non-main thread).
+int thread_wait(void)
+{
+    struct proc *p;
+    int havekids, pid;
+
+    acquire(&ptable.lock);
+    for (;;) {
+        // Scan through table looking for exited children (non-main thread).
+        havekids = 0;
+        for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+            if ((p->mthread) || (p->parent != proc))
+                continue;
+            havekids = 1;
+            if (p->state == ZOMBIE) {
+                // Found one.
+                pid = p->pid;
+                kfree(p->kstack);
+                p->kstack = 0;
+                freestackvm(p->pgdir, p->ustack);
+                p->mthread = 1;
+                p->ustack = 0;
+                p->pid = 0;
+                p->parent = 0;
+                p->name[0] = 0;
+                p->killed = 0;
+                p->state = UNUSED;
+                release(&ptable.lock);
+                return pid;
+            }
+        }
+
+        // No point waiting if we don't have any children (non-main thread).
         if (!havekids || proc->killed) {
             release(&ptable.lock);
             return -1;

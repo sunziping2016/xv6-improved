@@ -7,10 +7,12 @@
 #include "xv6/x86.h"
 #include "xv6/elf.h"
 
-// TODO: What if it's called from a non-main thread
-// It may be better to do nothing and return an error.
 int exec(char *path, char **argv)
 {
+    // Only main thread can call this.
+    if (!proc->mthread)
+        panic("exec: calling from non-main thread");
+
     char *s, *last;
     int i, off;
     uint argc, sz, sp, ustack[3 + MAXARG + 1];

@@ -26,6 +26,8 @@ int uptime(void);
 
 // thread api
 int thread_create(void);
+int thread_exit(void) __attribute__((noreturn));
+int thread_wait(void);
 
 // ulib.c
 int stat(char*, struct stat*);
