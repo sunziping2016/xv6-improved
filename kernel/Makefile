@@ -26,7 +26,7 @@ OBJS = \
 	string.o\
 	swtch.o\
 	syscall.o\
-	syscallAdd.o\
+	tui.o\
 	sysfile.o\
 	sysproc.o\
 	timer.o\
