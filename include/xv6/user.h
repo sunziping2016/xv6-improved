@@ -23,6 +23,10 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int getcrtc(int, int);
+int setcrtc(int, int);
+int getcurpos();
+int setcurpos(int);
 
 // ulib.c
 int stat(char*, struct stat*);

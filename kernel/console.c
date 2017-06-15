@@ -124,6 +124,8 @@ panic(char *s)
 
 //PAGEBREAK: 50
 #define BACKSPACE 0x100
+#define KEY_LF 0xE4
+#define KEY_RT 0xE5
 #define CRTPORT 0x3d4
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
 
@@ -131,7 +133,7 @@ static void
 cgaputc(int c)
 {
     int pos;
-
+    int flag = 0;
     // Cursor position: col + 80*row.
     outb(CRTPORT, 14);
     pos = inb(CRTPORT + 1) << 8;
@@ -141,8 +143,22 @@ cgaputc(int c)
     if (c == '\n')
         pos += 80 - pos % 80;
     else if (c == BACKSPACE) {
-        if (pos > 0) --pos;
-    } else
+        if (pos > 0) {
+            --pos;
+            flag = 1;
+        }
+    }
+    else if (c == KEY_LF){
+        if (pos > 0){
+            --pos;
+        }
+    }
+    else if (c == KEY_RT){
+        if (pos <= 25 * 80) {
+            ++pos;
+        }
+    }
+    else
         crt[pos++] = (c & 0xff) | 0x0700; // black on white
 
     if (pos < 0 || pos > 25 * 80)
@@ -153,12 +169,14 @@ cgaputc(int c)
         pos -= 80;
         memset(crt + pos, 0, sizeof(crt[0]) * (24 * 80 - pos));
     }
-
     outb(CRTPORT, 14);
     outb(CRTPORT + 1, pos >> 8);
     outb(CRTPORT, 15);
     outb(CRTPORT + 1, pos);
-    crt[pos] = ' ' | 0x0700;
+
+    if(flag == 1)
+        crt[pos] = ' ' | 0x0700;
+
 }
 
 void
