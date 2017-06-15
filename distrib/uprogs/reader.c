@@ -88,26 +88,7 @@ read_file(int fd)
 }
 
 void
-display()
-{
-
-    struct linebuffer *lbp = upper_lbp;
-    for(int line_num = 0; line_num < 23; line_num++)
-    {
-        int i = 0;
-        printf(1, "%s", lbp->buf);
-        //while(lbp->buf[i] != 0 || i < 80)
-        //{
-        //    i++;
-        //    printf(1, "0");
-        //        setcrtc(line_num, lbp->buf[i]);
-        //}
-        lbp = lbp->next;
-    }
-}
-
-void
-displayTest(struct linebuffer* lbp)
+display(struct linebuffer* lbp)
 {
     for(int line_num = 0; line_num < 23; line_num++)
     {
@@ -131,6 +112,13 @@ displayTest(struct linebuffer* lbp)
     }
 }
 
+void
+clear()
+{
+    for(int i = 0; i < 80 * 24; i++)
+        setcrtc(i, 0x0700 | ' ');
+}
+
 void cleanup()
 {
     struct linebuffer *lbp, *lbptmp;
@@ -149,7 +137,7 @@ void cleanup()
 void
 reader(int fd)
 {
-    int old_pos = getcurpos();
+    //int old_pos = getcurpos();
     char a[2];
     a[0] = 0;
     init();
@@ -162,15 +150,13 @@ reader(int fd)
             upper_lbp = upper_lbp->next;
         else if(a[0] == 'w' && upper_lbp->prev != &linebuffer_head)
             upper_lbp = upper_lbp->prev;
-        displayTest(upper_lbp);
+        display(upper_lbp);
         read(0, a, 2);
     }while(a[0] != 'q');
+    clear();
     cleanup();
-    setcurpos(old_pos);
-    //printf(1, "clean finished ");
-
+    setcurpos(0);
 }
-
 
 int
 main(int argc, char *argv[])
