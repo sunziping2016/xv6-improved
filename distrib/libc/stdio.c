@@ -1,3 +1,4 @@
+#include <xv6/user.h>
 #include <stdio.h>
 #include <float.h>
 #include <stdarg.h>
