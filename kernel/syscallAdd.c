@@ -23,39 +23,39 @@ static ushort *crt = (ushort*)P2V(0xb8000);
 int
 sys_getcrtc(void)
 {
-    initlock(&cons.lock, "console");
-    cons.locking = 1;
-    acquire(&cons.lock);
+    //initlock(&cons.lock, "console");
+    //cons.locking = 1;
+    //acquire(&cons.lock);
 
     int x, y;
     argint(0, &x);
     argint(1, &y);
 
-    release(&cons.lock);
+    //release(&cons.lock);
     return crt[y * 80 + x];
 }
 
 int
 sys_setcrtc(void)
 {
-    initlock(&cons.lock, "console");
-    cons.locking = 1;
-    acquire(&cons.lock);
+    //initlock(&cons.lock, "console");
+    //cons.locking = 1;
+    //acquire(&cons.lock);
 
     int pos, c;
     argint(0, &pos);
     argint(1, &c);
     crt[pos] = c;
-    release(&cons.lock);
+    //release(&cons.lock);
     return c;
 }
 
 int
 sys_getcurpos(void)
 {
-    initlock(&cons.lock, "console");
-    cons.locking = 1;
-    acquire(&cons.lock);
+    //initlock(&cons.lock, "console");
+    //cons.locking = 1;
+    //acquire(&cons.lock);
 
     int pos;
     // Cursor position: col + 80*row.
@@ -64,7 +64,7 @@ sys_getcurpos(void)
     outb(CRTPORT, 15);
     pos |= inb(CRTPORT + 1);
 
-    release(&cons.lock);
+    //release(&cons.lock);
 
     return pos;
 }
@@ -72,9 +72,9 @@ sys_getcurpos(void)
 int
 sys_setcurpos(void)
 {
-    initlock(&cons.lock, "console");
-    cons.locking = 1;
-    acquire(&cons.lock);
+    //initlock(&cons.lock, "console");
+    //cons.locking = 1;
+    //acquire(&cons.lock);
 
     int pos;
     argint(0, &pos);
@@ -82,6 +82,6 @@ sys_setcurpos(void)
     outb(CRTPORT + 1, pos >> 8);
     outb(CRTPORT, 15);
     outb(CRTPORT + 1, pos);
-    release(&cons.lock);
+    //release(&cons.lock);
     return 1;
 }
