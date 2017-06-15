@@ -3,6 +3,7 @@
 #include "xv6/types.h"
 #include "xv6/user.h"
 #include "xv6/fcntl.h"
+//#include <stdio.h>
 
 // Parsed command representation
 #define EXEC  1
