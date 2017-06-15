@@ -8,7 +8,7 @@ all: $(OUTDIR)/mkfs
 mkfs: $(OUTDIR)/mkfs
 
 $(OUTDIR)/mkfs: mkfs.c | $(OUTDIR)
-	$(CC) -Wextra -Wall -O2 -o $@ $^ -I../include
+	$(CC) -Wextra -Wall -O2 -o $@ $^ -iquote ../include
 
 clean:
 	rm -f $(OUTDIR)/*

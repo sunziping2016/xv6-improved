@@ -7,6 +7,7 @@ UPROGS = cat echo forktest grep init kill ln ls \
 		mkdir rm sh stressfs usertests wc zombie pwd reader stdtests
 
 ULIB = $(OUTDIR)/../ulib/ulib.a
+LIBC = $(OUTDIR)/../libc/libc.a
 _UPROGS = $(addprefix $(OUTDIR)/, $(UPROGS))
 
 all: $(_UPROGS)
@@ -14,10 +15,13 @@ all: $(_UPROGS)
 $(ULIB): FORCE
 	$(MAKE) -C ../ulib all
 
+$(LIBC): FORCE
+	$(MAKE) -C ../libc all
+
 $(OUTDIR)/%.o: %.c | $(OUTDIR)
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(OUTDIR)/%: $(OUTDIR)/%.o $(ULIB) | $(OUTDIR)
+$(OUTDIR)/%: $(OUTDIR)/%.o $(ULIB) $(LIBC) | $(OUTDIR)
 	$(LD) $(LDFLAGS) -s -N -e main -Ttext 0 -o $@ $^
 
 install: $(_UPROGS)

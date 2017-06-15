@@ -3,6 +3,7 @@
 #include "xv6/fcntl.h"
 #include "xv6/user.h"
 #include "xv6/x86.h"
+#include <stddef.h>
 
 char*
 gets(char *buf, int max)
@@ -47,190 +48,6 @@ atoi(const char *s)
     return n;
 }
 
-
-char *strcpy(register char *to, register const char *from)
-{
-    char *save = to;
-    for (; (*to = *from); ++from, ++to);
-    return(save);
-}
-
-char *strncpy(char *dst, const char *src, register uint n)
-{
-    if (n != 0) {
-        register char *d = dst;
-        register const char *s = src;
-
-        do {
-            if ((*d++ = *s++) == 0) {
-                /* NUL pad the remaining n-1 bytes */
-                while (--n != 0)
-                    *d++ = 0;
-                break;
-            }
-        } while (--n != 0);
-    }
-    return (dst);
-}
-
-int strcmp(register const char *s1, register const char *s2)
-{
-    while (*s1 == *s2++)
-        if (*s1++ == 0)
-            return (0);
-    return (*(unsigned char *)s1 - *(unsigned char *)--s2);
-}
-
-int strncmp(register const char *s1, register const char *s2, register uint n)
-{
-
-    if (n == 0)
-        return (0);
-    do {
-        if (*s1 != *s2++)
-            return (*(unsigned char *)s1 - *(unsigned char *)--s2);
-        if (*s1++ == 0)
-            break;
-    } while (--n != 0);
-    return (0);
-}
-
-uint strlen(const char *str)
-{
-    register const char *s;
-
-    for (s = str; *s; ++s);
-    return(s - str);
-}
-
-char *strchr(register const char *p, register const char ch)
-{
-    for (;; ++p) {
-        if (*p == ch)
-            return((char *)p);
-        if (!*p)
-            return((char *)0);
-    }
-    /* NOTREACHED */
-}
-
-
-char *strrchr(register const char *p, register const char *ch)
-{
-    register char *save;
-
-    for (save = 0;; ++p) {
-        if (*p == ch)
-            save = (char *)p;
-        if (!*p)
-            return(save);
-    }
-    /* NOTREACHED */
-}
-
-char *strstr(register const char *s, register const char *find)
-{
-    register char c, sc;
-    register uint len;
-
-    if ((c = *find++) != 0) {
-        len = strlen(find);
-        do {
-            do {
-                if ((sc = *s++) == 0)
-                    return (0);
-            } while (sc != c);
-        } while (strncmp(s, find, len) != 0);
-        s--;
-    }
-    return ((char *)s);
-}
-
-char *strcat(register char *s, register const char *append)
-{
-    char *save = s;
-
-    for (; *s; ++s);
-    while ((*s++ = *append++));
-    return(save);
-}
-
-char *strncat(char *dst, const char *src, register uint n)
-{
-    if (n != 0) {
-        register char *d = dst;
-        register const char *s = src;
-
-        while (*d != 0)
-            d++;
-        do {
-            if ((*d = *s++) == 0)
-                break;
-            d++;
-        } while (--n != 0);
-        *d = 0;
-    }
-    return (dst);
-}
-
-
-void *memccpy(void *t, const void *f, int c, register uint n)
-{
-    if (n) {
-        register unsigned char *tp = t;
-        register const unsigned char *fp = f;
-        register unsigned char uc = c;
-        do {
-            if ((*tp++ = *fp++) == uc)
-                return (tp);
-        } while (--n != 0);
-    }
-    return (0);
-}
-
-void *memcpy(void *vdst, const void *vsrc, register uint n)
-{
-    char *dst = (char *)vdst;
-    const char *src = (const char *)vsrc;
-
-    while (n-- > 0)
-        *dst++ = *src++;
-    return vdst;
-}
-
-
-void *memchr(const void *s, register unsigned char c, register uint n)
-{
-    if (n != 0) {
-        register const unsigned char *p = s;
-
-        do {
-            if (*p++ == c)
-                return ((void *)(p - 1));
-        } while (--n != 0);
-    }
-    return (0);
-}
-
-int memcmp(const void *s1, const void *s2, uint n)
-{
-    if (n != 0) {
-        register const unsigned char *p1 = s1, *p2 = s2;
-
-        do {
-            if (*p1++ != *p2++)
-                return (*--p1 - *--p2);
-        } while (--n != 0);
-    }
-    return (0);
-}
-
-void *memset(void *dst, register int c, register uint n)
-{
-    stosb(dst, c, n);
-    return dst;
-}
-
 // stdio.c
 FILE _std_files[3] = {
         {0},
@@ -241,25 +58,27 @@ FILE _std_files[3] = {
 
 //#define FLOATING_POINT
 
-#define	MAXEXP		308
-#define	MAXFRACT	39
+#include <float.h>
 
-#define	BUF		(MAXEXP+MAXFRACT+1)	/* + decimal point */
-#define	DEFPREC		6
+#define        MAXEXP          308
+#define        MAXFRACT        39
 
-#define	to_digit(c)	((c) - '0')
-#define is_digit(c)	((unsigned)to_digit(c) <= 9)
-#define	to_char(n)	((n) + '0')
+#define        BUF             (MAXEXP+MAXFRACT+1)     /* + decimal point */
+#define        DEFPREC         6
 
-#define	ALT		0x001		/* alternate form */
-#define	HEXPREFIX	0x002		/* add 0x or 0X prefix */
-#define	LADJUST		0x004		/* left adjustment */
-#define	LONGDBL		0x008		/* long double; unimplemented */
-#define	LONGINT		0x010		/* long integer */
-#define	QUADINT		0x020		/* quad integer */
-#define	SHORTINT	0x040		/* short integer */
-#define	ZEROPAD		0x080		/* zero (as opposed to blank) pad */
-#define FPT		0x100		/* Floating point number */
+#define        to_digit(c)     ((c) - '0')
+#define is_digit(c)    ((unsigned)to_digit(c) <= 9)
+#define        to_char(n)      ((n) + '0')
+
+#define        ALT             0x001           /* alternate form */
+#define        HEXPREFIX       0x002           /* add 0x or 0X prefix */
+#define        LADJUST         0x004           /* left adjustment */
+#define        LONGDBL         0x008           /* long double; unimplemented */
+#define        LONGINT         0x010           /* long integer */
+#define        QUADINT         0x020           /* quad integer */
+#define        SHORTINT        0x040           /* short integer */
+#define        ZEROPAD         0x080           /* zero (as opposed to blank) pad */
+#define FPT            0x100           /* Floating point number */
 
 struct __siov {
     void	*iov_base;
@@ -318,72 +137,14 @@ static int __sprint(FILE *fp, register struct __suio *uio)
     return (err);
 }
 
-
-int isnan(double d)
-{
-    register struct IEEEdp {
-        u_int manl : 32;
-        u_int manh : 20;
-        u_int  exp : 11;
-        u_int sign :  1;
-    } *p = (struct IEEEdp *)&d;
-
-    return(p->exp == 2047 && (p->manh || p->manl));
-}
-
-int isinf(double d)
-{
-    register struct IEEEdp {
-        u_int manl : 32;
-        u_int manh : 20;
-        u_int  exp : 11;
-        u_int sign :  1;
-    } *p = (struct IEEEdp *)&d;
-
-    return(p->exp == 2047 && !p->manh && !p->manl);
-}
+#include <math.h>
 
 #define FLOATING_POINT
 
+#include "float.h"
+
 #ifdef FLOATING_POINT
 #define IEEE_8087
-
-#ifndef _MACHINE_FLOAT_H_
-#define _MACHINE_FLOAT_H_ 1
-
-#define FLT_RADIX	2		/* b */
-#define FLT_ROUNDS	1		/* FP addition rounds to nearest */
-
-#define FLT_MANT_DIG	24		/* p */
-#define FLT_EPSILON	1.19209290E-07F	/* b**(1-p) */
-#define FLT_DIG		6		/* floor((p-1)*log10(b))+(b == 10) */
-#define FLT_MIN_EXP	(-125)		/* emin */
-#define FLT_MIN		1.17549435E-38F	/* b**(emin-1) */
-#define FLT_MIN_10_EXP	(-37)		/* ceil(log10(b**(emin-1))) */
-#define FLT_MAX_EXP	128		/* emax */
-#define FLT_MAX		3.40282347E+38F	/* (1-b**(-p))*b**emax */
-#define FLT_MAX_10_EXP	38		/* floor(log10((1-b**(-p))*b**emax)) */
-
-#define DBL_MANT_DIG	53
-#define DBL_EPSILON	2.2204460492503131E-16
-#define DBL_DIG		15
-#define DBL_MIN_EXP	(-1021)
-#define DBL_MIN		2.2250738585072014E-308
-#define DBL_MIN_10_EXP	(-307)
-#define DBL_MAX_EXP	1024
-#define DBL_MAX		1.7976931348623157E+308
-#define DBL_MAX_10_EXP	308
-
-#define LDBL_MANT_DIG	DBL_MANT_DIG
-#define LDBL_EPSILON	DBL_EPSILON
-#define LDBL_DIG	DBL_DIG
-#define LDBL_MIN_EXP	DBL_MIN_EXP
-#define LDBL_MIN	DBL_MIN
-#define LDBL_MIN_10_EXP	DBL_MIN_10_EXP
-#define LDBL_MAX_EXP	DBL_MAX_EXP
-#define LDBL_MAX	DBL_MAX
-#define LDBL_MAX_10_EXP	DBL_MAX_10_EXP
-#endif /* _MACHINE_FLOAT_H_ */
 
 #ifndef CONST
 #define CONST const
