@@ -274,3 +274,8 @@ static void insertion_sort(void *bot, size_t nmemb, size_t size, int (*compar)(c
             t1 += size;
     }
 }
+
+void abort()
+{
+    exit();
+}

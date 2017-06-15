@@ -13,4 +13,5 @@ int rand();
 #define size_t unsigned int
 
 void qsort(void *, size_t, size_t, int (*)(const void *, const void *));
+void abort();
 #endif
