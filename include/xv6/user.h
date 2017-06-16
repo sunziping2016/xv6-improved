@@ -37,6 +37,13 @@ void lock_release(userlock);
 int lock_holding(userlock);
 void lock_free(userlock);
 
+//// semaphore
+usersem semaphore_create(int);
+void semaphore_acquire(usersem);
+void semaphore_release(usersem);
+int semaphore_getcounter(usersem);
+void semaphore_free(usersem);
+
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);

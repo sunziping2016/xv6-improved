@@ -104,6 +104,12 @@ extern int sys_lock_release(void);
 extern int sys_lock_holding(void);
 extern int sys_lock_free(void);
 
+extern int sys_semaphore_create(void);
+extern int sys_semaphore_acquire(void);
+extern int sys_semaphore_release(void);
+extern int sys_semaphore_getcounter(void);
+extern int sys_semaphore_free(void);
+
 static int (*syscalls[])(void) = {
     [SYS_fork]    sys_fork,
     [SYS_exit]    sys_exit,
@@ -136,6 +142,12 @@ static int (*syscalls[])(void) = {
     [SYS_lock_release] sys_lock_release,
     [SYS_lock_holding] sys_lock_holding,
     [SYS_lock_free]    sys_lock_free,
+
+    [SYS_semaphore_create]     sys_semaphore_create,
+    [SYS_semaphore_acquire]    sys_semaphore_acquire,
+    [SYS_semaphore_release]    sys_semaphore_release,
+    [SYS_semaphore_getcounter] sys_semaphore_getcounter,
+    [SYS_semaphore_free]       sys_semaphore_free,
 };
 
 void syscall(void)

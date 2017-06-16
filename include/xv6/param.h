@@ -13,4 +13,6 @@
 #define FSSIZE       1000  // size of file system in blocks
 
 #define NLOCK        64  // maximum number of lock
+#define NSEM         64  // maximum number of semaphore
+#define NPNODE       NPROC  // maximum number of process node
 

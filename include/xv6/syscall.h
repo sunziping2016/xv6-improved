@@ -30,3 +30,9 @@
 #define SYS_lock_release 33
 #define SYS_lock_holding 34
 #define SYS_lock_free    35
+
+#define SYS_semaphore_create      41
+#define SYS_semaphore_acquire     42
+#define SYS_semaphore_release     43
+#define SYS_semaphore_getcounter  44
+#define SYS_semaphore_free        45

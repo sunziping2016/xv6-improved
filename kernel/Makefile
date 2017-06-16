@@ -35,6 +35,7 @@ OBJS = \
 	trapasm.o\
 	vectors.o\
 	vm.o\
+	semaphore.o\
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 
