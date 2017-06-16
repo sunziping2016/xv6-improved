@@ -1737,13 +1737,13 @@ void argptest()
     printf(1, "arg test passed\n");
 }
 
-unsigned long randstate = 1;
-unsigned int
-rand()
-{
-    randstate = randstate * 1664525 + 1013904223;
-    return randstate;
-}
+//unsigned long randstate = 1;
+//unsigned int
+//rand()
+//{
+//   randstate = randstate * 1664525 + 1013904223;
+//    return randstate;
+//}
 
 int
 main(int argc, char *argv[])

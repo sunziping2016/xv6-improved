@@ -1,3 +1,4 @@
+#include <xv6/user.h>
 #include <stdio.h>
 #include <float.h>
 #include <stdarg.h>
@@ -40,9 +41,7 @@ struct __suio {
     int	uio_resid;
 };
 
-int __sfvwrite(fp, uio)
-        register FILE *fp;
-        register struct __suio *uio;
+int __sfvwrite(register FILE *fp, register struct __suio * uio)
 {
     register unsigned int len;
     register char *p;
@@ -2818,4 +2817,145 @@ int myprintf(char const *fmt, ...)
     ret = vfprintf(stdout, fmt, ap);
     va_end(ap);
     return (ret);
+}
+
+int fprintf(FILE *fp, const char *fmt, ...)
+{
+    int ret;
+    va_list ap;
+
+#if __STDC__
+    va_start(ap, fmt);
+#else
+    va_start(ap);
+#endif
+    ret = vfprintf(fp, fmt, ap);
+    va_end(ap);
+    return (ret);
+}
+
+int puts(char const *s)
+{
+    size_t c = strlen(s);
+    struct __suio uio;
+    struct __siov iov[2];
+
+    iov[0].iov_base = (void *)s;
+    iov[0].iov_len = c;
+    iov[1].iov_base = "\n";
+    iov[1].iov_len = 1;
+    uio.uio_resid = c + 1;
+    uio.uio_iov = &iov[0];
+    uio.uio_iovcnt = 2;
+    return (__sfvwrite(stdout, &uio) ? EOF : '\n');
+}
+
+int fputs(const char *s, FILE *fp)
+{
+    struct __suio uio;
+    struct __siov iov;
+
+    iov.iov_base = (void *)s;
+    iov.iov_len = uio.uio_resid = strlen(s);
+    uio.uio_iov = &iov;
+    uio.uio_iovcnt = 1;
+    return (__sfvwrite(fp, &uio));
+}
+
+#include "xv6/user.h"
+
+int	__srget (FILE *fp)
+{
+    int i, cc;
+    char c;
+    cc = read(fp->fd, &c, 1);
+    if (cc < 1)
+        return EOF;
+    return c;
+}
+
+int __sputc (int _c, FILE *_p)
+{
+    write(_p->fd, &_c, 1);
+    return 1;
+}
+
+char *mygets(char *buf)
+{
+    register int c;
+    register char *s;
+    for (s = buf; (c = getchar()) != '\n' && c != '\r';)
+        if (c == EOF)
+            if (s == buf)
+                return (NULL);
+            else
+                break;
+        else
+            *s++ = c;
+    *s = 0;
+    return (buf);
+}
+
+char *fgets(char *buf, int max, FILE *fp)
+{
+    int i, cc;
+    char c;
+    for (i = 0; i + 1 < max; ) {
+        cc = read(fp->fd, &c, 1);
+        if (cc < 1)
+            break;
+        if (c == EOF && i == 0)
+            return NULL;
+        if (c == '\n' || c == '\r')
+            break;
+        buf[i++] = c;
+    }
+    buf[i] = '\0';
+    return buf;
+}
+
+#define O_RDONLY  0x000
+#define O_WRONLY  0x001
+#define O_RDWR    0x002
+#define O_CREATE  0x200
+
+int __sflags(register char *mode, int *optr)
+{
+    register int ret, m, o;
+    switch (*mode++) {
+
+        case 'r':	/* open for reading */
+            m = O_RDONLY;
+            o = 0;
+            break;
+
+        case 'w':	/* open for writing */
+            m = O_WRONLY;
+            o = O_CREATE;
+            break;
+
+        default:	/* illegal mode */
+            return (0);
+    }
+    /* [rwa]\+ or [rwa]b\+ means read and write */
+    if (*mode == '+') {
+        m = O_RDWR;
+    }
+    *optr = m | o;
+    return (1);
+}
+
+FILE *fopen(const char *file, const char *mode)
+{
+    register FILE *fp;
+    register int f;
+    int flags, oflags;
+
+    if ((flags = __sflags(mode, &oflags)) == 0)
+        return (NULL);
+    if ((f = open(file, O_RDONLY)) < 0) {
+        return (NULL);
+    }
+    fp->fd = f;
+    return (fp);
 }
