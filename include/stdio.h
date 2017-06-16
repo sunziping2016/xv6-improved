@@ -14,6 +14,6 @@ extern FILE _std_files[];
 #define stdout (&_std_files[1])
 #define stderr (&_std_files[2])
 
-extern int myprintf(char const *fmt, ...);
+int myprintf(char const *fmt, ...);
 
 #endif

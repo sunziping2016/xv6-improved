@@ -27,6 +27,7 @@ int getcrtc(int, int);
 int setcrtc(int, int);
 int getcurpos();
 int setcurpos(int);
+int gettime(struct rtcdate*);
 
 // ulib.c
 int stat(char*, struct stat*);
