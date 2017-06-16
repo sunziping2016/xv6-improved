@@ -98,6 +98,12 @@ extern int thread_create(void);
 extern int thread_exit(void);
 extern int thread_wait(void);
 
+extern int sys_lock_create(void);
+extern int sys_lock_acquire(void);
+extern int sys_lock_release(void);
+extern int sys_lock_holding(void);
+extern int sys_lock_free(void);
+
 static int (*syscalls[])(void) = {
     [SYS_fork]    sys_fork,
     [SYS_exit]    sys_exit,
@@ -120,9 +126,16 @@ static int (*syscalls[])(void) = {
     [SYS_link]    sys_link,
     [SYS_mkdir]   sys_mkdir,
     [SYS_close]   sys_close,
+
     [SYS_thread_create] thread_create,
-    [SYS_thread_exit] thread_exit,
-    [SYS_thread_wait] thread_wait,
+    [SYS_thread_exit]   thread_exit,
+    [SYS_thread_wait]   thread_wait,
+
+    [SYS_lock_create]  sys_lock_create,
+    [SYS_lock_acquire] sys_lock_acquire,
+    [SYS_lock_release] sys_lock_release,
+    [SYS_lock_holding] sys_lock_holding,
+    [SYS_lock_free]    sys_lock_free,
 };
 
 void syscall(void)

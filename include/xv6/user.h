@@ -29,6 +29,14 @@ int thread_create(void);
 int thread_exit(void) __attribute__((noreturn));
 int thread_wait(void);
 
+// synchronization api
+//// sleep lock
+userlock lock_create(void);
+void lock_acquire(userlock);
+void lock_release(userlock);
+int lock_holding(userlock);
+void lock_free(userlock);
+
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);

@@ -22,5 +22,11 @@
 #define SYS_close  21
 
 #define SYS_thread_create 22
-#define SYS_thread_exit 23
-#define SYS_thread_wait 24
+#define SYS_thread_exit   23
+#define SYS_thread_wait   24
+
+#define SYS_lock_create  31
+#define SYS_lock_acquire 32
+#define SYS_lock_release 33
+#define SYS_lock_holding 34
+#define SYS_lock_free    35
