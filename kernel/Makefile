@@ -26,6 +26,7 @@ OBJS = \
 	string.o\
 	swtch.o\
 	syscall.o\
+	tui.o\
 	sysfile.o\
 	sysproc.o\
 	timer.o\
@@ -63,10 +64,10 @@ $(OUTDIR)/vectors.o: vectors.pl | $(OUTDIR)
 	$(CC) $(OUTDIR)/vectors.S $(CFLAGS) -c -o $@
 
 $(OUTDIR)/%.o: %.c | $(OUTDIR)
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) $< $(CFLAGS) -fno-pic -c -o $@
 
 $(OUTDIR)/%.o: %.S | $(OUTDIR)
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) $< $(CFLAGS) -fno-pic -c -o $@
 
 $(OUTDIR):
 	mkdir -p $@

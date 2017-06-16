@@ -29,3 +29,8 @@ SYSCALL(getpid)
 SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
+SYSCALL(getcrtc)
+SYSCALL(setcrtc)
+SYSCALL(getcurpos)
+SYSCALL(setcurpos)
+
