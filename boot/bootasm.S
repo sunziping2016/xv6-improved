@@ -18,31 +18,6 @@ start:
   movw    %ax,%es             # -> Extra Segment
   movw    %ax,%ss             # -> Stack Segment
 
-  # Play a weird sound of Middle C
-  movb    $182,%al
-  outb    %al,$0x43
-  movw    $4560,%ax
-
-  outb    %al,$0x42
-  movb    %ah,%al
-  outb    %al,$0x42
-  inb     $0x61,%al
-
-  orb     $0x3,%al
-  outb    %al,$0x61
-  movw    $25,%ebx
-  
-pause1:
-  movw    $65535,%ecx
-pause2:
-  decl    %ecx
-  jne     pause2
-  decl    %ebx
-  jne     pause1
-  inb     $0x61,%al
-  andb    $0xfc,%al
-  outb    %al,$0x61
-
   # Physical address line A20 is tied to zero so that the first PCs 
   # with 2 MB would run software that assumed 1 MB.  Undo that.
 seta20.1:

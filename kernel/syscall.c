@@ -97,6 +97,8 @@ extern int sys_getcrtc(void);
 extern int sys_setcrtc(void);
 extern int sys_getcurpos(void);
 extern int sys_setcurpos(void);
+extern int sys_playsound(void);
+extern int sys_nosound(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]    sys_fork,
@@ -124,6 +126,8 @@ static int (*syscalls[])(void) = {
     [SYS_setcrtc] sys_setcrtc,
     [SYS_getcurpos] sys_getcurpos,
     [SYS_setcurpos] sys_setcurpos,
+    [SYS_playsound] sys_playsound,
+    [SYS_nosound] sys_nosound,
 };
 
 void syscall(void)

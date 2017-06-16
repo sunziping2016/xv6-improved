@@ -35,6 +35,7 @@ OBJS = \
 	trapasm.o\
 	vectors.o\
 	vm.o\
+	sound.o\
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 

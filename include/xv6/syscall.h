@@ -24,3 +24,5 @@
 #define SYS_setcrtc 23
 #define SYS_getcurpos 24
 #define SYS_setcurpos 25
+#define SYS_playsound 26
+#define SYS_nosound 27
