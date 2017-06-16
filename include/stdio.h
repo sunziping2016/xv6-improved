@@ -34,7 +34,7 @@ int fputs(const char *s, FILE *fp);
 char *mygets(char *buf);
 char *fgets(char *buf, int max, FILE *fp);
 FILE *fopen(const char *file, const char *mode);
-int	 scanf(const char *, ...);
+//int	 scanf(const char *, ...);
 
 
 

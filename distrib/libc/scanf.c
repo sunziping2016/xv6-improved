@@ -2,10 +2,49 @@
 #include <float.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <ctype.h>
 
 #if 0
 
-int __svfscanf(register FILE *fp, char const *fmt0,  va_list ap)
+#define	BUF		513	/* Maximum length of numeric string. */
+
+/*
+ * Flags used during conversion.
+ */
+#define	LONG		0x01	/* l: long or double */
+#define	LONGDBL		0x02	/* L: long double; unimplemented */
+#define	SHORT		0x04	/* h: short */
+#define	SUPPRESS	0x08	/* suppress assignment */
+#define	POINTER		0x10	/* weird %p pointer (`fake hex') */
+#define	NOSKIP		0x20	/* do not skip blanks */
+
+/*
+ * The following are used in numeric conversions only:
+ * SIGNOK, NDIGITS, DPTOK, and EXPOK are for floating point;
+ * SIGNOK, NDIGITS, PFXOK, and NZDIGITS are for integral.
+ */
+#define	SIGNOK		0x40	/* +/- is (still) legal */
+#define	NDIGITS		0x80	/* no digits detected */
+
+#define	DPTOK		0x100	/* (float) decimal point is still legal */
+#define	EXPOK		0x200	/* (float) exponent (e+3, etc) still legal */
+
+#define	PFXOK		0x100	/* 0x prefix is (still) legal */
+#define	NZDIGITS	0x200	/* no zero digits detected */
+
+/*
+ * Conversion types.
+ */
+#define	CT_CHAR		0	/* %c conversion */
+#define	CT_CCL		1	/* %[...] conversion */
+#define	CT_STRING	2	/* %s conversion */
+#define	CT_INT		3	/* integer, i.e., strtol or strtoul */
+#define	CT_FLOAT	4	/* floating, i.e., strtod */
+
+#define u_char unsigned char
+#define u_long unsigned long
+
+int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 {
     register u_char *fmt = (u_char *)fmt0;
     register int c;		/* character from format, or conversion */
@@ -34,13 +73,7 @@ int __svfscanf(register FILE *fp, char const *fmt0,  va_list ap)
         if (c == 0)
             return (nassigned);
         if (isspace(c)) {
-            for (;;) {
-                if (fp->_r <= 0 && __srefill(fp))
-                    return (nassigned);
-                if (!isspace(*fp->_p))
-                    break;
-                nread++, fp->_r--, fp->_p++;
-            }
+
             continue;
         }
         if (c != '%')
@@ -557,11 +590,17 @@ int __svfscanf(register FILE *fp, char const *fmt0,  va_list ap)
     return (nassigned);
 }
 
-int myscanf(char const *fmt, ...)
+
+int	 scanf(const char *fmt, ...)
 {
 int ret;
 va_list ap;
+
+#if __STDC__
 va_start(ap, fmt);
+#else
+va_start(ap);
+#endif
 ret = __svfscanf(stdin, fmt, ap);
 va_end(ap);
 return (ret);
