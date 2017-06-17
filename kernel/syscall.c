@@ -93,7 +93,10 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
-extern int sys_proccmd(void);
+extern int sys_getcrtc(void);
+extern int sys_setcrtc(void);
+extern int sys_getcurpos(void);
+extern int sys_setcurpos(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]    sys_fork,
@@ -117,7 +120,10 @@ static int (*syscalls[])(void) = {
     [SYS_link]    sys_link,
     [SYS_mkdir]   sys_mkdir,
     [SYS_close]   sys_close,
-    [SYS_proccmd] sys_proccmd,
+    [SYS_getcrtc] sys_getcrtc,
+    [SYS_setcrtc] sys_setcrtc,
+    [SYS_getcurpos] sys_getcurpos,
+    [SYS_setcurpos] sys_setcurpos,
 };
 
 void syscall(void)

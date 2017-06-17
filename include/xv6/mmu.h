@@ -1,5 +1,3 @@
-#ifndef _XV6_MMU_H
-#define _XV6_MMU_H
 // This file contains definitions for the
 // x86 memory management unit (MMU).
 
@@ -51,9 +49,6 @@
 
 // cpu->gdt[NSEGS] holds the above segments.
 #define NSEGS     7
-
-
-
 
 //PAGEBREAK!
 #ifndef __ASSEMBLER__
@@ -153,7 +148,6 @@ struct segdesc {
 #define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF)
 #define PTE_FLAGS(pte)  ((uint)(pte) &  0xFFF)
 
-
 #ifndef __ASSEMBLER__
 typedef uint pte_t;
 
@@ -234,5 +228,3 @@ struct gatedesc {
 }
 
 #endif
-
-#endif //_XV6_MMU_H
