@@ -1,4 +1,8 @@
-﻿#include "xv6/proc.h"
+﻿#include "xv6/types.h"
+#include "xv6/defs.h"
+#include "xv6/param.h"
+#include "xv6/mmu.h"
+#include "xv6/proc.h"
 #include "xv6/proc_fs.h"
 
 void  proc_root_init(void)
@@ -27,12 +31,12 @@ void  proc_process_init(struct proc*process)
   struct proc_dir_entry*proc_dir=proc_mkdir(numstr,PDE_DIR,root,process,read_dir_list);
   proc_mkdir("status",PDE_FILE,proc_dir,process,read_proc_stat);
 }
-/*
+
 void proc_update()
 {
   
 }
-*/
+
 void  proc_init(void)
 {
   proc_root_init();

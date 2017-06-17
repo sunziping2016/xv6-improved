@@ -12,27 +12,23 @@ enum pdetype{PDE_NONE,PDE_DIR,PDE_FILE};
 
 struct proc_dir_entry
 {
+  unsigned int id;
   unsigned short namelen;
   char name[20];
   enum pdetype type;
   struct proc_dir_entry *next, *parent, *subdir;
   void *data;
+  struct inode*inode;
   read_proc_t *read_proc;
   //write_proc_t *write_proc;
 };
 
-struct proc_cmd{
-  int type;
-  char filepath[30];
-};
+struct proc_dir_entry*root;
 
 struct {
     struct spinlock lock;
     struct proc_dir_entry pde[NPDE];
 } pdetable;
-
-struct proc_dir_entry *root;
-struct proc_dir_entry *now;
 
 //generic.c
 struct proc_dir_entry *proc_mkdir(const char *name,enum pdetype type,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc);
@@ -45,20 +41,13 @@ int read_proc_stat(char *page,void *data);
 int read_cpuinfo(char *page,void *data);
 int read_dir_list(char *page,void *data);
 int read_proc_file(struct proc_dir_entry *f, char *page);
-int read_proc(char*name, char *page);
+int readproc(struct inode *ip, char *dst, unsigned int off, unsigned int n);
 
 //init.c
 void  proc_root_init(void);
 void  proc_cpuinfo_init(void);
 void  proc_process_init(struct proc*process);
-//void proc_update(void);
+void proc_update(void);
 void  proc_init(void);
-
-//proc cmd
-void exec_proc_cmd(char* buf);
-void parse_proc_cmd(char* buf,struct proc_cmd*cmd);
-void plist_cmd(char* path);
-void pcd_cmd(char* path);
-void pcat_cmd(char* path);
 
 #endif

@@ -1,6 +1,13 @@
-﻿#include "xv6/defs.h"
-#include "xv6/proc.h"
+﻿#include "xv6/types.h"
+#include "xv6/defs.h"
 #include "xv6/proc_fs.h"
+#include "xv6/sleeplock.h"
+#include "xv6/fs.h"
+#include "xv6/file.h"
+#include "xv6/param.h"
+#include "xv6/mmu.h"
+#include "xv6/proc.h"
+
 
 int 
 num_to_str(char*str,unsigned int num,unsigned int offset)
@@ -90,25 +97,17 @@ read_cpuinfo(char *page, void *data)
 int 
 read_dir_list(char *page,void *data)
 {
+  struct dirent de;
   int off=0;
   struct proc_dir_entry*p=((struct proc_dir_entry*)data)->subdir;
   while(p!=0)
   {
-    safestrcpy(page+off,p->name,p->namelen);
-    off+=p->namelen;
-    if(p->type==PDE_DIR)
-    {
-      safestrcpy(page+off,"  DIR\n",6);
-      off+=6;
-    }
-    else 
-    {
-      safestrcpy(page+off,"  FILE\n",7);
-      off+=7;
-    }
+    de.inum=p->id;
+    strncpy(de.name,p->name,p->namelen);
+    de.name[p->namelen]='\0';
+    strncpy(page+off,(char*)&de,sizeof(struct dirent));
+    off+=sizeof(struct dirent);
   }
-  page[off]=0;
-  off++;
   return off;
 }
 //读某proc文件
@@ -120,23 +119,22 @@ read_proc_file(struct proc_dir_entry *f, char *page)
   else return (*(f->read_proc))(page,f->data);
 }
 
-int read_proc(char*name, char *page)
+int readproc(struct inode *ip, char *dst, unsigned int off, unsigned int n)
 {
-  //proc_update();
-  struct proc_dir_entry*s=proc_lookup(name);
-  if(s==0)
-  {
-    cprintf("proc file not exist\n");
+  struct proc_dir_entry *f;
+  char page[4096];
+  int size;
+  if(ip->inum>=NPDE)
+    panic("findproc");
+  f=&pdetable.pde[ip->inum-1];
+  size=read_proc_file(f,page);
+  if(size<=off)
     return -1;
-  }
-  read_proc_file(s,page);
-  /*if(n==-1)
-  {
-    cprintf("proc file read failed");
-    return -1;
-  }*/
+  if(n+off>size)
+    n=size-off;
+  strncpy(dst,page,n);
+  return n;
 }
-
 
 
 

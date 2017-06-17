@@ -435,17 +435,21 @@ readi(struct inode *ip, char *dst, uint off, uint n)
     uint tot, m;
     struct buf *bp;
 
+    if(ip->dev==PROCFSDEV)
+    {
+      return readproc(ip,dst,off,n);
+    }
+    
     if (ip->type == T_DEV) {
         if (ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].read)
             return -1;
         return devsw[ip->major].read(ip, dst, n);
     }
-
+    
     if (off > ip->size || off + n < off)
         return -1;
     if (off + n > ip->size)
         n = ip->size - off;
-
     for (tot = 0; tot < n; tot += m, off += m, dst += m) {
         bp = bread(ip->dev, bmap(ip, off / BSIZE));
         m = min(n - tot, BSIZE - off % BSIZE);
@@ -470,6 +474,9 @@ writei(struct inode *ip, char *src, uint off, uint n)
     uint tot, m;
     struct buf *bp;
 
+    if(ip->dev==PROCFSDEV)
+      return -1;
+    
     if (ip->type == T_DEV) {
         if (ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].write)
             return -1;
@@ -516,6 +523,10 @@ dirlookup(struct inode *dp, char *name, uint *poff)
     if (dp->type != T_DIR)
         panic("dirlookup not DIR");
 
+      if(dp->dev==ROOTDEV&&dp->inum==ROOTINO&&namecmp(name,"proc")==0)
+      {
+        return iget(PROCFSDEV,1);
+      }
     for (off = 0; off < dp->size; off += sizeof(de)) {
         if (readi(dp, (char*)&de, off, sizeof(de)) != sizeof(de))
             panic("dirlink read");
