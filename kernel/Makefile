@@ -36,6 +36,7 @@ OBJS = \
 	vectors.o\
 	vm.o\
 	sound.o\
+	devsound.o\
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 

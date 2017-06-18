@@ -26,6 +26,7 @@ main(void)
     picinit();       // another interrupt controller
     ioapicinit();    // another interrupt controller
     consoleinit();   // console hardware
+    soundinit();     // sound device
     uartinit();      // serial port
     pinit();         // process table
     tvinit();        // trap vectors

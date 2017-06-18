@@ -22,6 +22,9 @@ void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 void            panic(char*) __attribute__((noreturn));
 
+//devsound.c
+void            soundinit(void);
+
 // exec.c
 int             exec(char*, char**);
 
@@ -158,6 +161,7 @@ void            timerinit(void);
 // trap.c
 void            idtinit(void);
 extern uint     ticks;
+extern uint     new_ticks;
 void            tvinit(void);
 extern struct spinlock tickslock;
 
