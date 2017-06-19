@@ -481,12 +481,64 @@ readi(struct inode *ip, char *dst, uint off, uint n)
     if (off > ip->size + rootflag || off + n < off)
         return -1;
     if (off + n > ip->size)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+>>>>>>> 568fd3cdad622a63ec690fd96006c077cb436ea2
     {
       if(off+n>ip->size+rootflag)
         left=rootflag;
       else left=off + n - ip->size;
       n = ip->size - off;
     }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+        n = ip->size - off;
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+=======
+        n = ip->size - off;
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+=======
+        n = ip->size - off;
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+=======
+        n = ip->size - off;
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+=======
+        n = ip->size - off;
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+>>>>>>> 568fd3cdad622a63ec690fd96006c077cb436ea2
       
     for (tot = 0; tot < n; tot += m, off += m, dst += m) {
         bp = bread(ip->dev, bmap(ip, off / BSIZE));

@@ -45,5 +45,35 @@ void  proc_root_init(void);
 void  proc_cpuinfo_init(void);
 void  proc_add_process(struct proc*process);
 void  proc_update(void);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+void  proc_init(void);
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+void  proc_init(void);
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+void  proc_init(void);
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+void  proc_init(void);
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
+void  proc_init(void);
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+>>>>>>> 568fd3cdad622a63ec690fd96006c077cb436ea2
 
 #endif
