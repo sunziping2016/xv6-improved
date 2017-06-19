@@ -1,7 +1,8 @@
 ﻿#include "xv6/types.h"
 #include "xv6/defs.h"
-#include "xv6/proc_fs.h"
+#include "xv6/spinlock.h"
 #include "xv6/sleeplock.h"
+#include "xv6/proc_fs.h"
 #include "xv6/fs.h"
 #include "xv6/file.h"
 #include "xv6/param.h"
@@ -26,7 +27,7 @@ num_to_str(char*str,unsigned int num,unsigned int offset)
   return len;
 }
 
-int 
+/*int 
 proc_dir_to_str(char*str,unsigned short slen,struct proc_dir_entry*dir,unsigned short offset)
 {
   
@@ -36,7 +37,7 @@ int
 inode_dir_to_str(char*str,unsigned short slen,struct inode*dir,unsigned short offset)
 {
   
-}
+}*/
 
 int 
 read_line(char*page,const char*desc,unsigned int num,unsigned int off) 
@@ -118,7 +119,20 @@ read_proc_file(struct proc_dir_entry *f, char *page)
     return -1;
   else return (*(f->read_proc))(page,f->data);
 }
-
+int getsize(struct proc_dir_entry *f)
+{
+  struct proc_dir_entry *p;
+  int s=0;
+  if(f->type==PDE_FILE)
+    return 0;
+  p=f->subdir;
+  while(p!=0)
+  {
+    s=s+sizeof(struct dirent);
+    p=p->next;
+  }
+  return s;
+}
 int readproc(struct inode *ip, char *dst, unsigned int off, unsigned int n)
 {
   struct proc_dir_entry *f;

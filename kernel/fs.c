@@ -17,9 +17,11 @@
 #include "xv6/proc.h"
 #include "xv6/spinlock.h"
 #include "xv6/sleeplock.h"
+#include "xv6/proc_fs.h"
 #include "xv6/fs.h"
 #include "xv6/buf.h"
 #include "xv6/file.h"
+
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 static void itrunc(struct inode*);
@@ -282,7 +284,9 @@ ilock(struct inode *ip)
         panic("ilock");
 
     acquiresleep(&ip->lock);
-
+    
+    if(ip->dev==PROCFSDEV)
+      return;
     if (!(ip->flags & I_VALID)) {
         bp = bread(ip->dev, IBLOCK(ip->inum, sb));
         dip = (struct dinode*)bp->data + ip->inum % IPB;
@@ -425,6 +429,30 @@ stati(struct inode *ip, struct stat *st)
     st->type = ip->type;
     st->nlink = ip->nlink;
     st->size = ip->size;
+    if(ip->dev==ROOTDEV&&ip->inum==ROOTINO)
+      st->size=st->size+sizeof(struct dirent);
+}
+
+void allocproci(struct proc_dir_entry* pde)
+{
+  struct inode*p=iget(PROCFSDEV,pde->id);
+  if(pde->type==PDE_DIR)
+    p->type=1;
+  else if(pde->type==PDE_FILE)
+    p->type=2;
+  p->size=getsize(pde);
+}
+
+void updatesize(struct proc_dir_entry* pde)
+{
+  struct inode*p=iget(PROCFSDEV,pde->id);
+  p->size=getsize(pde);
+}
+
+void removeproci(struct proc_dir_entry* pde)
+{
+  struct inode*p=iget(PROCFSDEV,pde->id);
+  p->ref=0;
 }
 
 //PAGEBREAK!
@@ -434,22 +462,32 @@ readi(struct inode *ip, char *dst, uint off, uint n)
 {
     uint tot, m;
     struct buf *bp;
-
+    struct dirent proc;
+    int left=0;
+    int rootflag=0;
     if(ip->dev==PROCFSDEV)
     {
       return readproc(ip,dst,off,n);
     }
-    
+
     if (ip->type == T_DEV) {
         if (ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].read)
             return -1;
         return devsw[ip->major].read(ip, dst, n);
     }
-    
-    if (off > ip->size || off + n < off)
+    if(ip->dev==ROOTDEV&&ip->inum==ROOTINO)
+      rootflag=sizeof(struct dirent);
+      
+    if (off > ip->size + rootflag || off + n < off)
         return -1;
     if (off + n > ip->size)
-        n = ip->size - off;
+    {
+      if(off+n>ip->size+rootflag)
+        left=rootflag;
+      else left=off + n - ip->size;
+      n = ip->size - off;
+    }
+      
     for (tot = 0; tot < n; tot += m, off += m, dst += m) {
         bp = bread(ip->dev, bmap(ip, off / BSIZE));
         m = min(n - tot, BSIZE - off % BSIZE);
@@ -463,7 +501,14 @@ readi(struct inode *ip, char *dst, uint off, uint n)
         memmove(dst, bp->data + off % BSIZE, m);
         brelse(bp);
     }
-    return n;
+    if(left>0)
+    {
+      proc.inum=1;
+      strncpy(proc.name,"proc",4);
+      proc.name[4]=0;
+      memmove(dst,(char*)&proc,left);
+    }
+    return n+left;
 }
 
 // PAGEBREAK!
@@ -519,13 +564,17 @@ dirlookup(struct inode *dp, char *name, uint *poff)
 {
     uint off, inum;
     struct dirent de;
-
+    struct inode*p;
     if (dp->type != T_DIR)
         panic("dirlookup not DIR");
 
       if(dp->dev==ROOTDEV&&dp->inum==ROOTINO&&namecmp(name,"proc")==0)
       {
-        return iget(PROCFSDEV,1);
+        p=iget(PROCFSDEV,1);
+        //cprintf("proc\n");
+        //return iget(PROCFSDEV,1);
+        p->type=T_DIR;
+        return p;
       }
     for (off = 0; off < dp->size; off += sizeof(de)) {
         if (readi(dp, (char*)&de, off, sizeof(de)) != sizeof(de))
@@ -551,15 +600,19 @@ dirlink(struct inode *dp, char *name, uint inum)
     int off;
     struct dirent de;
     struct inode *ip;
-
+    int rootflag=0;
+    
     // Check that name is not present.
     if ((ip = dirlookup(dp, name, 0)) != 0) {
         iput(ip);
         return -1;
     }
-
+    
+    if(ip->dev==ROOTDEV&&ip->inum==ROOTINO)
+      rootflag=sizeof(struct dirent);
+    
     // Look for an empty dirent.
-    for (off = 0; off < dp->size; off += sizeof(de)) {
+    for (off = 0; off < dp->size+rootflag; off += sizeof(de)) {
         if (readi(dp, (char*)&de, off, sizeof(de)) != sizeof(de))
             panic("dirlink read");
         if (de.inum == 0)
@@ -622,7 +675,6 @@ static struct inode*
 namex(char *path, int nameiparent, char *name)
 {
     struct inode *ip, *next;
-
     if (*path == '/')
         ip = iget(ROOTDEV, ROOTINO);
     else
