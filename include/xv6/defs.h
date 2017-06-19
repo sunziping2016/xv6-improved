@@ -35,6 +35,7 @@ int             filestat(struct file*, struct stat*);
 int             filewrite(struct file*, char*, int n);
 
 // fs.c
+
 void            readsb(int dev, struct superblock *sb);
 int             dirlink(struct inode*, char*, uint);
 struct inode*   dirlookup(struct inode*, char*, uint*);
@@ -53,10 +54,11 @@ int             readi(struct inode*, char*, uint, uint);
 void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
 
-//proc_rw.c
-int readproc(struct inode *ip, char *dst, unsigned int off, unsigned int n);
 //proc_init.c
 void  proc_init(void);
+//proc_rw.c
+int readproc(struct inode *ip, char *dst, unsigned int off, unsigned int n);
+
 // ide.c
 void            ideinit(void);
 void            ideintr(void);
