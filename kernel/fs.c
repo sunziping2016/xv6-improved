@@ -485,8 +485,11 @@ readi(struct inode *ip, char *dst, uint off, uint n)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
+=======
 >>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
 =======
 >>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
@@ -504,6 +507,12 @@ readi(struct inode *ip, char *dst, uint off, uint n)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+        n = ip->size - off;
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
 =======
 =======
         n = ip->size - off;

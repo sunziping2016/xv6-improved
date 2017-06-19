@@ -26,7 +26,11 @@ void  proc_root_init(void)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   allocproci(root);
+=======
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
 =======
 >>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
 >>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98

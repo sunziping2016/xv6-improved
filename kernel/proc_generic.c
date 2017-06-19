@@ -75,8 +75,12 @@ struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype type,struct pro
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   allocproci(newpde);
   updatesize(parent);
+=======
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
 =======
 >>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
 >>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
@@ -119,7 +123,11 @@ void _remove_proc_entry(struct proc_dir_entry *pde)//非递归
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   removeproci(pde);
+=======
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
+>>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
 =======
 >>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
 >>>>>>> 6d0e71a717f320a2b92b6f993bce178c53490d98
