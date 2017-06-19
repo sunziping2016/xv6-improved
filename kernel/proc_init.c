@@ -19,7 +19,10 @@ void  proc_root_init(void)
   root->parent=root;
   root->next=0;
   root->pre=0;
+<<<<<<< HEAD
   allocproci(root);
+=======
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
 }
 void  proc_cpuinfo_init(void)
 {

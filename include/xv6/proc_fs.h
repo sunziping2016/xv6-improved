@@ -45,5 +45,9 @@ void  proc_root_init(void);
 void  proc_cpuinfo_init(void);
 void  proc_add_process(struct proc*process);
 void  proc_update(void);
+<<<<<<< HEAD
+=======
+void  proc_init(void);
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
 
 #endif

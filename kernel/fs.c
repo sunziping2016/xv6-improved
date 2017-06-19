@@ -481,12 +481,16 @@ readi(struct inode *ip, char *dst, uint off, uint n)
     if (off > ip->size + rootflag || off + n < off)
         return -1;
     if (off + n > ip->size)
+<<<<<<< HEAD
     {
       if(off+n>ip->size+rootflag)
         left=rootflag;
       else left=off + n - ip->size;
       n = ip->size - off;
     }
+=======
+        n = ip->size - off;
+>>>>>>> 079dade4e68029419f9b4b4559287e562e7ad59b
       
     for (tot = 0; tot < n; tot += m, off += m, dst += m) {
         bp = bread(ip->dev, bmap(ip, off / BSIZE));
