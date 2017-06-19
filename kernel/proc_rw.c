@@ -26,7 +26,7 @@ num_to_str(char*str,unsigned int num,unsigned int offset)
   return len;
 }
 
-int 
+/*int 
 proc_dir_to_str(char*str,unsigned short slen,struct proc_dir_entry*dir,unsigned short offset)
 {
   
@@ -36,7 +36,7 @@ int
 inode_dir_to_str(char*str,unsigned short slen,struct inode*dir,unsigned short offset)
 {
   
-}
+}*/
 
 int 
 read_line(char*page,const char*desc,unsigned int num,unsigned int off) 
