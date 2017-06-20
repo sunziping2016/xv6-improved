@@ -45,9 +45,9 @@ read_line(char*page,const char*desc,unsigned int num,unsigned int off)
   int len=0;
   int l=strlen(desc);
   len+=l;
-  safestrcpy(page+off,desc,l);
+  strncpy(page+off,desc,l);
   len+=num_to_str(page,num,off+len);
-  safestrcpy(page+off+len,"\n",1);
+  strncpy(page+off+len,"\n",1);
   len++;
   return len;
 }
@@ -145,7 +145,7 @@ int readproc(struct inode *ip, char *dst, unsigned int off, unsigned int n)
   f=&pdetable.pde[ip->inum-1];
   size=read_proc_file(f,page);
   if(size<=off)
-    return -1;
+    return 0;
   if(n+off>size)
     n=size-off;
   memmove(dst,page+off,n);
