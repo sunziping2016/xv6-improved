@@ -106,8 +106,9 @@ read_dir_list(char *page,void *data)
     de.inum=p->id;
     strncpy(de.name,p->name,p->namelen);
     de.name[p->namelen]='\0';
-    strncpy(page+off,(char*)&de,sizeof(struct dirent));
+    memmove(page+off,(char*)&de,sizeof(struct dirent));
     off+=sizeof(struct dirent);
+    p=p->next;
   }
   return off;
 }
@@ -115,9 +116,10 @@ read_dir_list(char *page,void *data)
 int 
 read_proc_file(struct proc_dir_entry *f, char *page)
 {
+  int n;
   if(f->type==PDE_NONE)
     return -1;
-  else return (*(f->read_proc))(page,f->data);
+  else return (f->read_proc)(page,f->data);
 }
 int getsize(struct proc_dir_entry *f)
 {
@@ -146,7 +148,7 @@ int readproc(struct inode *ip, char *dst, unsigned int off, unsigned int n)
     return -1;
   if(n+off>size)
     n=size-off;
-  strncpy(dst,page,n);
+  memmove(dst,page+off,n);
   return n;
 }
 

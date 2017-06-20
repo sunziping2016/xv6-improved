@@ -2,7 +2,7 @@
 #define _XV6_PROC_FS_H
 
 #define NPDE 100
-typedef int(*read_proc_t)(char *page,void *data);
+typedef int (*read_proc_t)(char *page,void *data);
 
 enum pdetype{PDE_NONE,PDE_DIR,PDE_FILE};
 
@@ -15,7 +15,7 @@ struct proc_dir_entry
   struct proc_dir_entry *next,*pre, *parent, *subdir;
   void *data;
   struct inode*inode;
-  read_proc_t *read_proc;
+  read_proc_t read_proc;
   //write_proc_t *write_proc;
 };
 

@@ -60,7 +60,6 @@ balloc(uint dev)
 {
     int b, bi, m;
     struct buf *bp;
-
     bp = 0;
     for (b = 0; b < sb.size; b += BPB) {
         bp = bread(dev, BBLOCK(b, sb));
@@ -191,6 +190,11 @@ ialloc(uint dev, short type)
     struct buf *bp;
     struct dinode *dip;
 
+    if(dev==PROCFSDEV)
+    {
+      cprintf("procfs\n");
+      return iget(dev, inum);
+    }
     for (inum = 1; inum < sb.ninodes; inum++) {
         bp = bread(dev, IBLOCK(inum, sb));
         dip = (struct dinode*)bp->data + inum % IPB;
@@ -209,7 +213,7 @@ ialloc(uint dev, short type)
 // Copy a modified in-memory inode to disk.
 void
 iupdate(struct inode *ip)
-{
+{ 
     struct buf *bp;
     struct dinode *dip;
 

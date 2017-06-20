@@ -41,7 +41,7 @@ struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype type,struct pro
     return 0;
   //init
   newpde->namelen=strlen(name);
-  safestrcpy(newpde->name,name,newpde->namelen+1);
+  strncpy(newpde->name,name,newpde->namelen+1);
   newpde->type=type;
   newpde->data=data;
   newpde->read_proc=read_proc;
@@ -54,9 +54,9 @@ struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype type,struct pro
   {
     if((strncmp(p->name,newpde->name,p->namelen)>0&&p->type==newpde->type)
       ||(p->type==PDE_DIR&&newpde->type==PDE_FILE))
-      break;
-    p=p->next;
+        break;
     q=p;
+    p=p->next;
   }
   newpde->next=p;
   newpde->pre=q;
