@@ -56,7 +56,7 @@ bzero(int dev, int bno)
 static uint
 balloc(uint dev)
 {
-    int b, bi, m;
+    uint b, bi, m;
     struct buf *bp;
 
     bp = 0;
@@ -185,7 +185,7 @@ static struct inode* iget(uint dev, uint inum);
 struct inode*
 ialloc(uint dev, short type)
 {
-    int inum;
+    uint inum;
     struct buf *bp;
     struct dinode *dip;
 
@@ -389,7 +389,7 @@ bmap(struct inode *ip, uint bn)
 static void
 itrunc(struct inode *ip)
 {
-    int i, j;
+    uint i, j;
     struct buf *bp;
     uint *a;
 
@@ -537,7 +537,7 @@ dirlookup(struct inode *dp, char *name, uint *poff)
 int
 dirlink(struct inode *dp, char *name, uint inum)
 {
-    int off;
+    uint off;
     struct dirent de;
     struct inode *ip;
 
