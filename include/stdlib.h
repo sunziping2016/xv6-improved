@@ -1,6 +1,8 @@
 #ifndef STDLIB_H
 #define STDLIB_H
 
+#include <stddef.h>
+
 void* malloc(unsigned int);
 void free(void*);
 int abs(int);
@@ -9,8 +11,6 @@ int abs(int);
 
 void srand(unsigned);
 int rand();
-
-#define size_t unsigned int
 
 void qsort(void *, size_t, size_t, int (*)(const void *, const void *));
 void abort();
