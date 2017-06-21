@@ -4,8 +4,10 @@
 #include "xv6/memlayout.h"
 #include "xv6/mmu.h"
 #include "xv6/x86.h"
+#include "xv6/signal.h"
 #include "xv6/proc.h"
 #include "xv6/spinlock.h"
+
 
 struct {
     struct spinlock lock;

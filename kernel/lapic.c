@@ -9,6 +9,7 @@
 #include "xv6/traps.h"
 #include "xv6/mmu.h"
 #include "xv6/x86.h"
+#include "xv6/signal.h"
 #include "xv6/proc.h"  // ncpu
 
 // Local APIC registers, divided by 4 for use as uint[] indices.

@@ -1,8 +1,10 @@
 // Shell.
 
 #include "xv6/types.h"
+#include "xv6/signal.h"
 #include "xv6/user.h"
 #include "xv6/fcntl.h"
+#include "xv6/kbd.h"
 
 // Parsed command representation
 #define EXEC  1
@@ -157,6 +159,21 @@ main(void)
 
     // Read and run input commands.
     while (getcmd(buf, sizeof(buf)) >= 0) {
+        if(buf[0] == C('C'))
+        {
+            printf(1, "c");
+            sigkill(getpid(), SIGINT);
+        }
+        if(buf[0] == C('R'))
+        {
+            printf(1, "r");
+            sigkill(getpid(), SIGSTOP);
+        }
+        if(buf[0] == C('E'))
+        {
+            printf(1, "e");
+            sigkill(getpid(), SIGCONT);
+        }
         if (buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' ') {
             // Chdir must be called by the parent, not the child.
             buf[strlen(buf) - 1] = 0; // chop \n
@@ -491,3 +508,91 @@ nulterminate(struct cmd *cmd)
     }
     return cmd;
 }
+
+void sighandler(int sig)
+{
+    if(sig == SIGINT)
+    {
+        exit();
+    }
+}
+
+void sig_handler_t(int sig)
+{
+    if(sig == SIGINT) {
+        //cprintf("catch SIGINT\n");
+    }
+}
+
+void sigdelsetmask(sigset_t *set, unsigned long mask)
+{
+    set->sig[0] &= ~mask;
+}
+void *sig_handler(struct proc *t, int sig)
+{
+    //return t->sighand->action[sig - 1].sa.sa_handler;
+    //if(sig == SIGINT)
+    //{
+    //cprintf("catch SIGINT\n");
+    //}
+}
+
+int sig_handler_ignored(void *handler, int sig)
+{
+/* Is it explicitly or implicitly ignored? */
+    return handler == SIG_IGN ||
+           (handler == SIG_DEF/* && sig_kernel_ignore(sig)*/);
+}
+/* int flush_sigqueue_mask(sigset_t *mask, struct sigpending *s)
+ {
+     struct sigqueue *q, *n;
+     sigset_t m;
+
+     sigandsets(&m, mask, &s->signal);
+     if (sigisemptyset(&m))
+         return 0;
+
+     sigandnsets(&s->signal, &s->signal, mask);
+     //list_for_each_entry_safe(q, n, &s->list, list) {
+         if (sigismember(mask, q->info.si_signo)) {
+             list_del_init(&q->list);
+             __sigqueue_free(q);
+         }
+     }
+     return 1;
+ }*/
+
+/*void user_signal(void)
+{
+    struct proc *p;
+    for (;;) {
+        // Enable interrupts on this processor.
+        sti();
+
+        // Loop over process table looking for process to run.
+        acquire(&ptable.lock);
+        for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+            if (p->state != RUNNING)
+                continue;
+            release(&ptable.lock);
+            struct sigaction action, old_action;
+            action.sa_handler = sig_handler_t;
+            sigemptyset(&action.sa_mask);
+            action.sa_flags = 0;
+            sigaction(SIGINT, (void *) 0, &old_action);
+            if (old_action.sa_handler != SIG_IGN) {
+                sigaction(SIGINT, &action, (void *) 0);
+            }
+        }
+    }
+}*/
+
+void
+setsignal(void)
+{
+    sigset(SIGSTOP, SIG_DEF);
+    sigset(SIGCONT, SIG_DEF);
+    sigset(SIGINT, SIG_DEF);
+    sigset(SIGCHLD, SIG_DEF);
+}
+

@@ -12,6 +12,7 @@
 #include "xv6/file.h"
 #include "xv6/memlayout.h"
 #include "xv6/mmu.h"
+#include "xv6/signal.h"
 #include "xv6/proc.h"
 #include "xv6/x86.h"
 

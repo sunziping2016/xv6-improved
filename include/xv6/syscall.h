@@ -24,3 +24,10 @@
 #define SYS_setcrtc 23
 #define SYS_getcurpos 24
 #define SYS_setcurpos 25
+#define SYS_sigaction 26
+#define SYS_sigkill 27
+#define SYS_raise 28
+#define SYS_sigqueue 29
+#define SYS_siginterrupt 30
+#define SYS_sigset 31
+#define SYS_sigrelse 32

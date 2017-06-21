@@ -9,6 +9,7 @@
 #include "xv6/mp.h"
 #include "xv6/x86.h"
 #include "xv6/mmu.h"
+#include "xv6/signal.h"
 #include "xv6/proc.h"
 
 struct cpu cpus[NCPU];

@@ -27,6 +27,14 @@ int getcrtc(int, int);
 int setcrtc(int, int);
 int getcurpos();
 int setcurpos(int);
+int sigaction(int sig, const struct sigaction *,
+              struct sigaction *);
+int sigkill(int, int);
+int raise(int);
+int sigqueue(int, int, const union sigval);
+int siginterrupt(int, int);
+void (*sigset(int, void (*)(int)))(int);
+int    sigrelse(int);
 
 // ulib.c
 int stat(char*, struct stat*);
