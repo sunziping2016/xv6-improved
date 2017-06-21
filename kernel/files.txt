@@ -1,0 +1,9 @@
+core/kernel_init.o
+core/mem_pool.o
+core/estring.o
+net/sockcall.o
+net/unix_dgram.o
+net/inet.o
+net/inet_local_iface.o
+net/inet_routing.o
+net/inet_dgram.o

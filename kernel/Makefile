@@ -35,6 +35,15 @@ OBJS = \
 	trapasm.o\
 	vectors.o\
 	vm.o\
+        kernel_init.o\
+        mem_pool.o\
+        estring.o\
+        sockcall.o\
+        unix_dgram.o\
+        inet.o\
+        inet_local_iface.o\
+        inet_routing.o\
+        inet_dgram.o\
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 

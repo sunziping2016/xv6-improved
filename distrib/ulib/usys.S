@@ -33,4 +33,4 @@ SYSCALL(getcrtc)
 SYSCALL(setcrtc)
 SYSCALL(getcurpos)
 SYSCALL(setcurpos)
-
+SYSCALL(sockcall, 22)
