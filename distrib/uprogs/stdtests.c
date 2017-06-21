@@ -1,18 +1,19 @@
 #include <xv6/user.h>
 #include <stdio.h>
+#include <setjmp.h>
 
-volatile int count = 0;
+jmp_buf jump_buffer;
+
+void a(int count)
+{
+    myprintf("a(%d) called\n", count);
+    longjmp(jump_buffer, count+1); // will return count+1 out of setjmp
+}
 
 int main(int argc, char *argv[])
 {
-    char a[128];
-    long i = 1023;
-    const char *p = "world";
-    double pi = 3.14159;
-    FILE *fi = fopen("README", "r");
-    //myprintf("%d", fi);
-    if(fgets(a, 50, fi))
-        fputs(a, _std_files + 1);
-    //fprintf(_std_files + 1, "hello, %s: %#06x   %.5f!\n", p, i, pi / 0);
+    volatile int count = 0; // modified local vars in setjmp scope must be volatile
+    if (setjmp(jump_buffer) != 9) // compare against constant in an if
+        a(++count);
     exit();
 }
