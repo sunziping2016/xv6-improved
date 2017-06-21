@@ -29,7 +29,7 @@ struct proc_dir_entry*pde_alloc(enum pdetype type)
   return 0;
 }
 
-struct proc_dir_entry *_proc_mkdir(const char *name,enum pdetype type,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)
+struct proc_dir_entry *proc_mkdir(const char *name,enum pdetype type,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)
 {
   if(parent->type!=PDE_DIR)
     return 0;
@@ -90,13 +90,6 @@ void updatepinode(struct proc_dir_entry *p)
   else if(p->type==PDE_FILE)
     (p->pinode).type=2;
   (p->pinode).size=getsize(p);
-}
-
-struct proc_dir_entry *proc_mkdir(const char *name,enum pdetype type,struct proc_dir_entry *parent, void *data, read_proc_t *read_proc)
-{
-  struct proc_dir_entry *n=_proc_mkdir(name,type,parent,data,read_proc);
-   if(type==PDE_DIR)
-     ;//_add_(n);
 }
 
 void _remove_proc_entry(struct proc_dir_entry *pde)//非递归

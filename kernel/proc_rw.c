@@ -26,37 +26,6 @@ num_to_str(char*str,unsigned int num,unsigned int offset)
   str[offset+len]=0;
   return len;
 }
-
-void strcopy(char *s,char *t)
-{
-    int lens = strlen(s),lent = strlen(t);
-    int i = 0;
-    for(i=lent;i<lent + lens;i++)
-    {
-        s[i] = t[i-lent];
-    }
-    s[i] = '\0';
-}
-
-
-void Inttostring(uint num,char *str)
-{
-    char temp[33];
-    int i = 0 ;
-    while(1)
-    {
-        temp[i] = num % 10;
-        i =  i + 1;
-        if( num/10<=0)
-           break;
-        num = num/10;
-    }
-    int j =0;
-    for(j;j < i;j++)
-       str[i] = temp[i-j-1];
-    str[j] = '\0';
-}
-
 /*int 
 proc_dir_to_str(char*str,unsigned short slen,struct proc_dir_entry*dir,unsigned short offset)
 {
@@ -70,189 +39,66 @@ inode_dir_to_str(char*str,unsigned short slen,struct inode*dir,unsigned short of
 }*/
 
 int 
-read_line(char*page,const char*desc,unsigned int num,unsigned int off) 
+read_line_uint(char*page,const char*desc,unsigned int num,unsigned int off) 
 {
   int len=0;
   int l=strlen(desc);
+  strncpy(page+off+len,desc,l);
   len+=l;
-  strncpy(page+off,desc,l);
   len+=num_to_str(page,num,off+len);
-  strncpy(page+off+len,"\n",1);
+  page[off+len]='\n';
   len++;
+  return len;
+}
+
+int read_line_char(char*page,const char*desc,char*data,unsigned int off)
+{
+  int l,len=0; 
+  l=strlen(desc);
+  strncpy(page+off+len,desc,l);len+=l;
+  l=strlen(data);
+  strncpy(page+off+len,desc,l);len+=l;
+  page[off+len]='\n';len++;
   return len;
 }
 
 int 
 read_proc_stat(char *page,void *data)
 {
-  /*
-  ProcessID:
-  Process state:
-  Parent process:
-  Current directory:
-  Process name:
-  ...
-  
-  */
+  struct proc*m_proc=(struct proc*)data;
   int off=0;
-  struct proc*p=(struct proc*)data;
-  off=off+read_line(page,"Process ID:",p->pid,off);
+  off=off+read_line_uint(page,"process id: ",(uint)m_proc->pid,off);
+  off=off+read_line_char(page,"process name: ",m_proc->name,off);
+  off=off+read_line_uint(page,"process memory size: ",(uint)m_proc->state,off);
+  off=off+read_line_uint(page,"Process state: ",(uint)m_proc->pid,off);
+  off=off+read_line_uint(page,"process to be killed: ",(uint)m_proc->killed,off);
+  page[off]=0;
+  off++;
   return off;
-  /*struct proc*m_proc=(struct proc*)data;
-  char *name,*str;
-     str = kalloc();
-    
-     //process
-     name = "process id: ";
-     uint s = (uint)m_proc->pid;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-     
-     name = "process name: ";
-     str = m_proc->name;
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-     
-     name = "process memory size: ";
-     s = m_proc->sz;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-
-     name = "Process state: ";
-     s = m_proc->state;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-     
-     name = "bottom of kernel stack for this process: ";
-     str = m_proc->kstack;
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-    
-     name = "process to be killed: ";
-     s = (uint)m_proc->killed;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-    
-     strcopy(page, "\n");
-
-     kfree(str);
-     return strlen(page);*/
 }
 
 int 
 read_cpuinfo(char *page, void *data)
 {
-  /*
-  uchar apicid;                // Local APIC ID
-  struct context *scheduler;   // swtch() here to enter scheduler
-  struct taskstate ts;         // Used by x86 to find stack for interrupt
-  struct segdesc gdt[NSEGS];   // x86 global descriptor table
-  volatile uint started;       // Has the CPU started?
-  int ncli;                    // Depth of pushcli nesting.
-  int intena;                  // Were interrupts enabled before pushcli?
-
-  // Cpu-local storage variables; see below
-  struct cpu *cpu;
-  struct proc *proc;           // The currently-running process.
-  */
+  struct cpu*m_cpu;
   int off=0;
   for(int i=0;i<ncpu;i++)
   {
-    off=off+read_line(page,"Local APIC ID:",(int)(cpus[i].apicid),off);
-    off=off+read_line(page,"The currently-running process ID:",(cpus[i].proc)->pid,off);
+    m_cpu=&(cpus[i]);
+    off=off+read_line_uint(page,"CPU has been started:             ",m_cpu->started,off);
+    off=off+read_line_uint(page,"CPU ID:",(int)(m_cpu->apicid),off);
+    off=off+read_line_uint(page,"current PCB running on CPU:       ","",off);
+    off=off+read_line_uint(page,"edi:                              ",m_cpu->scheduler->edi,off);
+    off=off+read_line_uint(page,"esi:                              ",m_cpu->scheduler->esi,off);
+    off=off+read_line_uint(page,"ebx:                              ",m_cpu->scheduler->ebx,off);
+    off=off+read_line_uint(page,"ebp:                              ",m_cpu->scheduler->edi,off);
+    off=off+read_line_uint(page,"eip:                              ",m_cpu->scheduler->eip,off);
+    off=off+read_line_uint(page,"depth of pushcli nesting:         ",(uint)m_cpu->ncli,off);
+    off=off+read_line_uint(page,"enable interrupts before pushcli: ",(uint)m_cpu->intena,off);  
   }
   page[off]=0;
   off++;
   return off;
-  /*cprintf("read cpu\n");
-  struct cpu*m_cpu=(struct cpu*)data;
-  
-  char *name,*str;
-
-     str = (char*)kalloc();
-
-     //CPU
-     name = "CPU has been started:";
-     uint s = m_cpu->started;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-  
-     name = "CPU ID: ";
-     str = (char)m_cpu->apicid;
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-     
-     name = "current PCB running on CPU:";
-     strcopy(page, name);
-     strcopy(page, "\n");
-     
-     name = "edi: ";
-     s = m_cpu->scheduler->edi;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-    
-     name = "esi: ";
-     s = m_cpu->scheduler->esi;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-
-     name = "ebx: ";
-     s = m_cpu->scheduler->ebx;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-     
-     name = "ebp: ";
-     s = m_cpu->scheduler->ebp;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-
-     name = "eip: ";
-     s = m_cpu->scheduler->eip;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-    
-     name = "depth of pushcli nesting: ";
-     s = (uint)m_cpu->ncli;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-     
-     name = "enable interrupts before pushcli: ";
-     s = (uint)m_cpu->intena;
-     Inttostring(s,str);
-     strcopy(str,"\n");
-     strcopy(page, name);
-     strcopy(page, str);
-     
-     strcopy(page, "\n");
-     
-     kfree(str);
-       cprintf("read cpu end\n");
-     return strlen(page); */
 }
 //读文件夹
 int 
