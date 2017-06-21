@@ -10,7 +10,8 @@
 #include "xv6/sleeplock.h"
 #include "xv6/file.h"
 
-struct devsw devsw[NDEV];
+
+struct devsw devsw[NDEV][MDEV];
 struct {
     struct spinlock lock;
     struct file file[NFILE];
@@ -97,7 +98,7 @@ int
 fileread(struct file *f, char *addr, int n)
 {
     int r;
-
+    mix_source_entropy();
     if (f->readable == 0)
         return -1;
     if (f->type == FD_PIPE)
@@ -118,7 +119,7 @@ int
 filewrite(struct file *f, char *addr, int n)
 {
     int r;
-
+    mix_source_entropy();
     if (f->writable == 0)
         return -1;
     if (f->type == FD_PIPE)
@@ -154,4 +155,3 @@ filewrite(struct file *f, char *addr, int n)
     }
     panic("filewrite");
 }
-

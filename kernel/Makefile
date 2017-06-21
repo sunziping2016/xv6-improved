@@ -6,6 +6,11 @@ OUTDIR = $(BUILDDIR)/kernel
 OBJS = \
 	bio.o\
 	console.o\
+	devzero.o\
+	devrandom.o\
+	devnull.o\
+	devhda.o\
+	devhdainfo.o\
 	entry.o\
 	exec.o\
 	file.o\
@@ -26,6 +31,7 @@ OBJS = \
 	string.o\
 	swtch.o\
 	syscall.o\
+	tui.o\
 	sysfile.o\
 	sysproc.o\
 	timer.o\
