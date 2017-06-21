@@ -9,6 +9,10 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct proc_table;
+struct proc_queue;
+
+enum procstate;
 
 // bio.c
 void            binit(void);
@@ -35,7 +39,6 @@ int             filestat(struct file*, struct stat*);
 int             filewrite(struct file*, char*, int n);
 
 // fs.c
-
 void            readsb(int dev, struct superblock *sb);
 int             dirlink(struct inode*, char*, uint);
 struct inode*   dirlookup(struct inode*, char*, uint*);
@@ -53,11 +56,6 @@ struct inode*   nameiparent(char*, char*);
 int             readi(struct inode*, char*, uint, uint);
 void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
-
-//proc_init.c
-void  proc_init(void);
-//proc_rw.c
-int readproc(struct inode *ip, char *dst, unsigned int off, unsigned int n);
 
 // ide.c
 void            ideinit(void);
@@ -122,6 +120,11 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+
+//proc_table.c
+int add_bar_back(struct proc_queue *q, struct proc *p);
+int add_bar_front(struct proc_queue *q, struct proc *p);
+struct proc* erase_bar(struct proc_queue *q, struct proc *p);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

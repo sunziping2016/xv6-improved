@@ -21,6 +21,7 @@ OBJS = \
 	picirq.o\
 	pipe.o\
 	proc.o\
+  proc_table.o\
   proc_generic.o\
   proc_init.o\
   proc_rw.o\

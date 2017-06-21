@@ -30,6 +30,8 @@ ls(char *path)
     struct dirent de;
     struct stat st;
     
+    int mmmm;
+    
     if ((fd = open(path, 0)) < 0) {
         printf(2, "ls: cannot open %s\n", path);
         return;
@@ -54,7 +56,7 @@ ls(char *path)
         strcpy(buf, path);
         p = buf + strlen(buf);
         *p++ = '/';
-        while (read(fd, &de, sizeof(de)) == sizeof(de)) {
+        while ( read(fd, &de, sizeof(de))== sizeof(de)) {
             if (de.inum == 0)
                 continue;
             memmove(p, de.name, DIRSIZ);
@@ -63,7 +65,7 @@ ls(char *path)
                 printf(1, "ls: cannot stat %s\n", buf);
                 continue;
             }
-            printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
+            printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);  
         }
         break;
     }

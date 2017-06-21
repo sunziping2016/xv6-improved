@@ -54,7 +54,3 @@ struct dirent {
   ushort inum;
   char name[DIRSIZ];
 };
-
-void allocproci(struct proc_dir_entry* pde);
-void updatesize(struct proc_dir_entry* pde);
-void removeproci(struct proc_dir_entry* pde);

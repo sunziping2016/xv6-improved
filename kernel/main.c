@@ -28,10 +28,10 @@ main(void)
     consoleinit();   // console hardware
     uartinit();      // serial port
     pinit();         // process table
+    proc_init();
     tvinit();        // trap vectors
     binit();         // buffer cache
     fileinit();      // file table
-    proc_init();
     ideinit();       // disk
     if (!ismp)
         timerinit();   // uniprocessor timer
