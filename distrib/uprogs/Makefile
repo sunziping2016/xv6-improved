@@ -23,7 +23,7 @@ $(LIBC): FORCE
 $(OUTDIR)/%.o: %.c | $(OUTDIR)
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(OUTDIR)/%: $(OUTDIR)/%.o $(ULIB) $(LIBC) $(START) | $(OUTDIR)
+$(OUTDIR)/%: $(OUTDIR)/%.o $(START) $(ULIB) $(LIBC) | $(OUTDIR)
 	$(LD) $(LDFLAGS) -s -N -e _start -Ttext 0 -o $@ $^
 
 install: $(_UPROGS)
