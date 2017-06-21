@@ -19,6 +19,8 @@ static void consputc(int);
 
 static int panicked = 0;
 
+int editStatus = 0;
+
 static struct {
     struct spinlock lock;
     int locking;
@@ -207,13 +209,76 @@ struct {
 
 #define C(x)  ((x)-'@')  // Control-x
 
+#define INSERT -2;
+
 void
 consoleintr(int (*getc)(void))
 {
     int c, doprocdump = 0;
 
+
     acquire(&cons.lock);
     while ((c = getc()) >= 0) {
+        if(editStatus != 0 && c != 0)
+        {
+
+            if(editStatus == -1)
+            {
+                switch(c)
+                {
+                    case C('I'):
+                        editStatus = -2;
+                        break;
+                    case 'q':
+                        editStatus = -3;
+                        break;
+                    case 0xe2:
+                        editStatus = -4;
+                        break;
+                    case 0xe3:
+                        editStatus = -5;
+                        break;
+                    case 0xe4:
+                        editStatus = -6;
+                        break;
+                    case 0xe5:
+                        editStatus = -7;
+                        break;
+                }
+            }
+            else if(editStatus == -2)
+            {
+                switch(c)
+                {
+                    case C('I'):
+                        editStatus = -1;
+                        break;
+                    case C('Q'):
+                        editStatus = -3;
+                    case 0xe2:
+                        editStatus = -4;
+                        break;
+                    case 0xe3:
+                        editStatus = -5;
+                        break;
+                    case 0xe4:
+                        editStatus = -6;
+                        break;
+                    case 0xe5:
+                        editStatus = -7;
+                        break;
+                    default:
+                        editStatus = c + 256;
+
+                }
+
+
+            }
+
+
+            continue;
+        }
+
         switch (c) {
         case C('P'):  // Process listing.
             // procdump() locks cons.lock indirectly; invoke later
