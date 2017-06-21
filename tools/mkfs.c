@@ -246,8 +246,7 @@ balloc(int used)
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
 // Append more data to the file with i-node number inum
-void
-iappend(uint inum, void *xp, int n)
+void iappend(uint inum, void *xp, int n)
 {
     char *p = (char*)xp;
     uint fbn, off, n1;

@@ -9,7 +9,7 @@
 //[ Header Files ]
 //Libxv6
 #include <stdint.h>
-#include <sys/socket.h>
+#include <xv6/sys/socket.h>
 
 //[ Types ]
 /**

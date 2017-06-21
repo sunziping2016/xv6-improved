@@ -8,6 +8,12 @@
     int $T_SYSCALL; \
     ret
 
+
+#define T_SYSCALL 64
+
+
+
+
 SYSCALL(fork)
 SYSCALL(exit)
 SYSCALL(wait)
@@ -33,4 +39,13 @@ SYSCALL(getcrtc)
 SYSCALL(setcrtc)
 SYSCALL(getcurpos)
 SYSCALL(setcurpos)
+SYSCALL(gettime)
+#define SYSCALL(name, call_num) \
+    .globl xv6_sys_##name; \
+    xv6_sys_##name: \
+    movl $call_num, %eax; \
+    int $T_SYSCALL; \
+    ret
 SYSCALL(sockcall, 22)
+
+

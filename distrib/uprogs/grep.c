@@ -30,7 +30,7 @@ grep(char *pattern, int fd)
             m = 0;
         if (m > 0) {
             m -= p - buf;
-            memmove(buf, p, m);
+            memcpy(buf, p, m);
         }
     }
 }

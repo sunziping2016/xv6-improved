@@ -1,162 +1,172 @@
-/** @file
- * @brief Xv6 socket API declaration.
- * @author Qifan Lu
- * @date April 10, 2016
- * @version 1.0.0
- */
+
 #pragma once
 
 //[ Header Files ]
-//Libxv6
-#include <stdint.h>
-#include <stddef.h>
-#include <sys/types.h>
+//Xv6 kernel
+#include "xv6/types.h"
+#include "xv6/fs.h"
+#include "xv6/file.h"
+//Xv6 kernel extra
+#include "xv6/etypes.h"
 
 //[ Constants ]
 //* Protocols
-/**
- * Datagram protocol
- */
+//Datagram protocol
 #define SOCK_DGRAM 0
-/**
- * Stream protocol
- */
+//Stream protocol
 #define SOCK_STREAM 1
-/**
- * Raw socket
- */
+//Raw socket
 #define SOCK_RAW 2
-/**
- * Sequenced-packet protocol
- */
+//Sequenced-packet protocol
 #define SOCK_SEQPACKET 3
 
 //* Domains
-/**
- * Internet domain (IPv4)
- */
+//Internet domain (IPv4)
 #define AF_INET 0
-/**
- * Internet domain (IPv6)
- */
+//Internet domain (IPv6)
 #define AF_INET6 1
-/**
- * Unix domain
- */
+//Unix domain
 #define AF_UNIX 2
 
 //* Message control flags
-/**
- * Leave received data in queue
- */
+//Leave received data in queue
 #define MSG_PEEK 0x1
 
-/**
- * Socket address field length
- */
-#define XV6_SOCKADDR_LEN 0
+//* Socket system call ID
+//Create
+#define SOCKCALL_CREATE 0
+//Bind
+#define SOCKCALL_BIND 1
+//Send
+#define SOCKCALL_SEND 2
+//Receive
+#define SOCKCALL_RECV 3
+//Close
+#define SOCKCALL_CLOSE 4
+
+//Maximum socket system call number
+#define SOCKCALL_OPER_MAX 4
+
+//Socket address field length
+#define SOCKADDR_LEN 0
 
 //[ Types ]
-/**
- * Socket address object length type
- */
+//Socket address object length type
 typedef int32_t socklen_t;
-/**
- * Socket address type
- */
+//Socket address type
 typedef uint32_t sa_family_t;
 
-/**
- * Abstract socket address type
- */
+//Abstract socket address type
 struct sockaddr
-{   /**
-     * Socket address family
-     */
+{   //Socket address family
     sa_family_t sa_family;
-    /**
-     * Socket address (Variable-length data)
-     */
-    char sa_data[XV6_SOCKADDR_LEN];
+    //Socket address (Variable-length data)
+    char sa_data[SOCKADDR_LEN];
 };
+
+//* Socket system call parameter types
+//Socket creation parameters
+struct sockcall_create_param
+{   int domain;
+    int type;
+    int protocol;
+};
+
+//Socket binding parameters
+struct sockcall_bind_param
+{   const struct sockaddr* address;
+    socklen_t address_len;
+};
+
+//Socket data sending parameters
+struct sockcall_send_param
+{   void* message;
+    size_t length;
+    int flags;
+    struct sockaddr* dest_addr;
+    socklen_t dest_len;
+};
+
+//Socket data receiving parameters
+struct sockcall_recv_param
+{   void* buffer;
+    size_t length;
+    int flags;
+    struct sockaddr* address;
+    socklen_t* address_len;
+};
+
+//* Kernel socket module types
+/**
+ * Socket type
+ */
+struct socket
+{   /**
+     * Socket domain
+     */
+    int domain;
+    /**
+     * Socket protocol
+     */
+    int type;
+};
+
+/**
+ * Socket system call function type
+ */
+typedef int (*sockcall_t)(struct file*, void*);
+
+/**
+ * Socket system call implementation type
+ */
+typedef struct
+{   /**
+     * Domain of the socket
+     */
+    int domain;
+    /**
+     * Protocol of the socket
+     */
+    int type;
+    /**
+     * Implementation functions
+     */
+    sockcall_t* impl;
+} sockcall_impl_t;
 
 //[ Functions ]
 /**
- * Bind socket to given address.
+ * Receive data from socket with read system call.
  *
- * @param socket Socket file descriptor.
- * @param sockaddr Address to be binded to.
- * @param address_len Length of the socket address structure.
- * @return 0 on success and 1 on failure. Error number is set when operation failed.
+ * @param sock_file Socket file descriptor object.
+ * @param buffer Buffer to hold received data.
+ * @param len Length of the buffer.
+ * TODO: @return
  */
-extern int bind(int socket, const struct sockaddr* address, socklen_t address_len);
+extern int sockread(struct file* sock_file, char* buffer, int len);
 
 /**
- * Receive message from remote socket.
+ * Send data to socket with write system call.
  *
- * Receive message from remote socket.
- * (Usually used with connection-based socket)
- *
- * @param socket Socket file descriptor.
- * @param buffer Buffer for receiving incoming data.
- * @param length Length of the buffer.
- * @param flags Special options for receiving data.
- * @return Length of the data received, or -1 for error. Error number is set when operation failed.
+ * @param sock_file Socket file descriptor object.
+ * @param data Data to be sent.
+ * @param len Length of the data.
+ * TODO: @return
  */
-extern ssize_t recv(int socket, void* buffer, size_t length, int flags);
+extern int sockwrite(struct file* sock_file, char* data, int len);
 
 /**
- * Receive data from remote socket, as well as remote address.
+ * Close given socket.
  *
- * Receive data from remote socket, as well as remote address.
- * (Usually used with connection-less socket)
- *
- * @param socket Socket file descriptor.
- * @param buffer Buffer for receiving incoming data.
- * @param length Length of the buffer.
- * @param flags Special options for receiving data.
- * @param address Used to receive the remote address.
- * @param address_len Used to receive the length of the remote address.
- * @return Length of the data received, or -1 for error. Error number is set when operation failed.
+ * @param sock_file Socket file descriptor object.
+ * @return 0 for success, error number for failure.
  */
-extern ssize_t recvfrom(int socket, void* buffer, size_t length, int flags, struct sockaddr* address, socklen_t* address_len);
+extern int sockclose(struct file* sock_file);
 
 /**
- * Send data to remote socket.
+ * Register socket system call implementation for given socket type.
  *
- * Send data to remote socket.
- * (Usually used with connection-based socket)
- *
- * @param socket Socket file descriptor.
- * @param message Message or data to be sent.
- * @param length Length of the message or data to be sent.
- * @param flags Special options for sending data.
- * @return Bytes of the data sent, or -1 for error. Error number is set when operation failed.
+ * @param impl Socket system call implementation.
+ * @return 0 for success, non-zero error number for failure.
  */
-extern ssize_t send(int socket, const void* message, size_t length, int flags);
-
-/**
- * Send data to remote socket, with remote address given.
- *
- * Send data to remote socket, with remote address given.
- * (Usually used with connection-less socket)
- *
- * @param socket Socket file descriptor.
- * @param message Message or data to be sent.
- * @param length Length of the message or data to be sent.
- * @param flags Special options for sending data.
- * @param dest_addr Destination address.
- * @param dest_len Destination address object length.
- * @return Bytes of the data sent, or -1 for error. Error number is set when operation failed.
- */
-extern ssize_t sendto(int socket, const void* message, size_t length, int flags, const struct sockaddr* dest_addr, socklen_t dest_len);
-
-/**
- * Create a socket of given type, protocol and domain.
- *
- * @param domain Network domain.
- * @param type Network protocol.
- * @param protocol Network sub-protocol.
- * @return File descriptor on success, or -1 on fail. Error number is set when operation failed.
- */
-extern int socket(int domain, int type, int protocol);
+extern int sockcall_impl_reg(sockcall_impl_t impl);
