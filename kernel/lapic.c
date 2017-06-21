@@ -245,3 +245,12 @@ void cmostime(struct rtcdate *r)
     *r = t1;
     r->year += 2000;
 }
+
+int sys_gettime()
+{
+    struct rtcdate *r;
+    if (argptr(0, (void *) &r, sizeof(*r)) != 0)
+        return -1;
+    cmostime(r);
+    return 0;
+}

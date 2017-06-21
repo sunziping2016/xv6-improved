@@ -3,7 +3,6 @@
 #include "xv6/fcntl.h"
 #include "xv6/user.h"
 #include "xv6/x86.h"
-#include <stddef.h>
 
 char*
 gets(char *buf, int max)

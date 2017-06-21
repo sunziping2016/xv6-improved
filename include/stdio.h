@@ -24,7 +24,7 @@ typedef struct {
 extern FILE _std_files[];
 #define stdin (&_std_files[0])
 #define stdout (&_std_files[1])
-#define stderr (&_std_files[2])
+#define stderr (&_std_files[2])`s
 #define	__sgetc(p) __srget(p)
 int	__srget (FILE *);
 int __sputc (int _c, FILE *_p);
@@ -50,7 +50,6 @@ char *fgets(char *buf, int max, FILE *fp);
 FILE *fopen(const char *file, const char *mode);
 int fclose(FILE *fp);
 int ungetc(int ch, FILE *stream);
-
 int	 scanf(const char *, ...);
 
 
