@@ -5,8 +5,19 @@
 #define EOF  (-1)
 #endif
 
+#define	__SRD	0x0004		/* OK to read */
+#define	__SWR	0x0008		/* OK to write */
+/* RD and WR are never simultaneously asserted */
+#define	__SRW	0x0010		/* open for reading & writing */
+#define	BUFSIZ	4
+
 typedef struct {
     int fd;
+    int buffer_size;
+    int buffer_end;
+    int cur;
+    char *buffer;
+    short flags;
 } FILE;
 
 extern FILE _std_files[];
@@ -34,9 +45,12 @@ int fputs(const char *s, FILE *fp);
 char *mygets(char *buf);
 char *fgets(char *buf, int max, FILE *fp);
 FILE *fopen(const char *file, const char *mode);
+int fclose(FILE *fp);
+int ungetc(int ch, FILE *stream);
+
 //int	 scanf(const char *, ...);
 
 
-
+double strtod(const char *s00, char **se);
 
 #endif

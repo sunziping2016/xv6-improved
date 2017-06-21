@@ -8,6 +8,7 @@
 
 #define	BUF		513	/* Maximum length of numeric string. */
 
+#define FLOATING_POINT
 /*
  * Flags used during conversion.
  */
@@ -44,6 +45,241 @@
 #define u_char unsigned char
 #define u_long unsigned long
 
+static u_char *__sccl();
+
+void (*__cleanup)();
+
+int _fwalk(register int (*function)())
+{
+    register FILE *fp;
+    register int n, ret;
+    register struct glue *g;
+
+    ret = 0;
+    for (g = &__sglue; g != NULL; g = g->next)
+        for (fp = g->iobs, n = g->niobs; --n >= 0; fp++)
+            if (fp->_flags != 0)
+                ret |= (*function)(fp);
+    return (ret);
+}
+
+void
+_cleanup()
+{
+    /* (void) _fwalk(fclose); */
+    (void) _fwalk(__sflush);		/* `cheating' */
+}
+
+void __sinit()
+{
+    /* make sure we clean up on exit */
+    __cleanup = _cleanup;		/* conservative */
+    __sdidinit = 1;
+}
+
+int __srefill(register FILE *fp)
+{
+
+    /* make sure stdio is set up */
+    if (!__sdidinit)
+        __sinit();
+
+    fp->_r = 0;		/* largely a convenience for callers */
+
+    /* SysV does not make this test; take it out for compatibility */
+    if (fp->_flags & __SEOF)
+        return (EOF);
+
+    /* if not already reading, have to be reading and writing */
+    if ((fp->_flags & __SRD) == 0) {
+        if ((fp->_flags & __SRW) == 0) {
+            errno = EBADF;
+            return (EOF);
+        }
+        /* switch to reading */
+        if (fp->_flags & __SWR) {
+            if (__sflush(fp))
+                return (EOF);
+            fp->_flags &= ~__SWR;
+            fp->_w = 0;
+            fp->_lbfsize = 0;
+        }
+        fp->_flags |= __SRD;
+    } else {
+        /*
+         * We were reading.  If there is an ungetc buffer,
+         * we must have been reading from that.  Drop it,
+         * restoring the previous buffer (if any).  If there
+         * is anything in that buffer, return.
+         */
+        if (HASUB(fp)) {
+            FREEUB(fp);
+            if ((fp->_r = fp->_ur) != 0) {
+                fp->_p = fp->_up;
+                return (0);
+            }
+        }
+    }
+
+    if (fp->_bf._base == NULL)
+        __smakebuf(fp);
+
+    /*
+     * Before reading from a line buffered or unbuffered file,
+     * flush all line buffered output files, per the ANSI C
+     * standard.
+     */
+    if (fp->_flags & (__SLBF|__SNBF))
+        (void) _fwalk(lflush);
+    fp->_p = fp->_bf._base;
+    fp->_r = (*fp->_read)(fp->_cookie, (char *)fp->_p, fp->_bf._size);
+    fp->_flags &= ~__SMOD;	/* buffer contents are again pristine */
+    if (fp->_r <= 0) {
+        if (fp->_r == 0)
+            fp->_flags |= __SEOF;
+        else {
+            fp->_r = 0;
+            fp->_flags |= __SERR;
+        }
+        return (EOF);
+    }
+    return (0);
+}
+
+
+long strtol(const char *nptr, char **endptr, register int base)
+{
+    register const char *s = nptr;
+    register unsigned long acc;
+    register int c;
+    register unsigned long cutoff;
+    register int neg = 0, any, cutlim;
+
+    /*
+     * Skip white space and pick up leading +/- sign if any.
+     * If base is 0, allow 0x for hex and 0 for octal, else
+     * assume decimal; if base is already 16, allow 0x.
+     */
+    do {
+        c = *s++;
+    } while (isspace(c));
+    if (c == '-') {
+        neg = 1;
+        c = *s++;
+    } else if (c == '+')
+        c = *s++;
+    if ((base == 0 || base == 16) &&
+        c == '0' && (*s == 'x' || *s == 'X')) {
+        c = s[1];
+        s += 2;
+        base = 16;
+    }
+    if (base == 0)
+        base = c == '0' ? 8 : 10;
+
+    /*
+     * Compute the cutoff value between legal numbers and illegal
+     * numbers.  That is the largest legal value, divided by the
+     * base.  An input number that is greater than this value, if
+     * followed by a legal input character, is too big.  One that
+     * is equal to this value may be valid or not; the limit
+     * between valid and invalid numbers is then based on the last
+     * digit.  For instance, if the range for longs is
+     * [-2147483648..2147483647] and the input base is 10,
+     * cutoff will be set to 214748364 and cutlim to either
+     * 7 (neg==0) or 8 (neg==1), meaning that if we have accumulated
+     * a value > 214748364, or equal but the next digit is > 7 (or 8),
+     * the number is too big, and we will return a range error.
+     *
+     * Set any if any `digits' consumed; make it negative to indicate
+     * overflow.
+     */
+    cutoff = neg ? -(unsigned long)LONG_MIN : LONG_MAX;
+    cutlim = cutoff % (unsigned long)base;
+    cutoff /= (unsigned long)base;
+    for (acc = 0, any = 0;; c = *s++) {
+        if (isdigit(c))
+            c -= '0';
+        else if (isalpha(c))
+            c -= isupper(c) ? 'A' - 10 : 'a' - 10;
+        else
+            break;
+        if (c >= base)
+            break;
+        if (any < 0 || acc > cutoff || acc == cutoff && c > cutlim)
+            any = -1;
+        else {
+            any = 1;
+            acc *= base;
+            acc += c;
+        }
+    }
+    if (any < 0) {
+        acc = neg ? LONG_MIN : LONG_MAX;
+        errno = ERANGE;
+    } else if (neg)
+        acc = -acc;
+    if (endptr != 0)
+        *endptr = any ? (char *)s - 1 : (char *)nptr;
+    return (acc);
+}
+
+unsigned long strtoul(const char *nptr, char **endptr, register int base)
+{
+    register const char *s = nptr;
+    register unsigned long acc;
+    register int c;
+    register unsigned long cutoff;
+    register int neg = 0, any, cutlim;
+
+    /*
+     * See strtol for comments as to the logic used.
+     */
+    do {
+        c = *s++;
+    } while (isspace(c));
+    if (c == '-') {
+        neg = 1;
+        c = *s++;
+    } else if (c == '+')
+        c = *s++;
+    if ((base == 0 || base == 16) &&
+        c == '0' && (*s == 'x' || *s == 'X')) {
+        c = s[1];
+        s += 2;
+        base = 16;
+    }
+    if (base == 0)
+        base = c == '0' ? 8 : 10;
+    cutoff = (unsigned long)ULONG_MAX / (unsigned long)base;
+    cutlim = (unsigned long)ULONG_MAX % (unsigned long)base;
+    for (acc = 0, any = 0;; c = *s++) {
+        if (isdigit(c))
+            c -= '0';
+        else if (isalpha(c))
+            c -= isupper(c) ? 'A' - 10 : 'a' - 10;
+        else
+            break;
+        if (c >= base)
+            break;
+        if (any < 0 || acc > cutoff || acc == cutoff && c > cutlim)
+            any = -1;
+        else {
+            any = 1;
+            acc *= base;
+            acc += c;
+        }
+    }
+    if (any < 0) {
+        acc = ULONG_MAX;
+        errno = ERANGE;
+    } else if (neg)
+        acc = -acc;
+    if (endptr != 0)
+        *endptr = any ? (char *)s - 1 : (char *)nptr;
+    return (acc);
+}
+
 int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 {
     register u_char *fmt = (u_char *)fmt0;
@@ -73,7 +309,13 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
         if (c == 0)
             return (nassigned);
         if (isspace(c)) {
-
+            for (;;) {
+                if (fp->_r <= 0 && __srefill(fp))
+                    return (nassigned);
+                if (!isspace(*fp->_p))
+                    break;
+                nread++, fp->_r--, fp->_p++;
+            }
             continue;
         }
         if (c != '%')
@@ -163,12 +405,12 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 
 #ifdef FLOATING_POINT
             case 'E':	/* compat   XXX */
-            case 'F':	/* compat */
-                flags |= LONG;
-                /* FALLTHROUGH */
-            case 'e': case 'f': case 'g':
-                c = CT_FLOAT;
-                break;
+		case 'F':	/* compat */
+			flags |= LONG;
+			/* FALLTHROUGH */
+		case 'e': case 'f': case 'g':
+			c = CT_FLOAT;
+			break;
 #endif
 
             case 's':
@@ -493,94 +735,94 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 
 #ifdef FLOATING_POINT
             case CT_FLOAT:
-                /* scan a floating point number as if by strtod */
+			/* scan a floating point number as if by strtod */
 #ifdef hardway
-                if (width == 0 || width > sizeof(buf) - 1)
+			if (width == 0 || width > sizeof(buf) - 1)
 				width = sizeof(buf) - 1;
 #else
-                /* size_t is unsigned, hence this optimisation */
-                if (--width > sizeof(buf) - 2)
-                    width = sizeof(buf) - 2;
-                width++;
+			/* size_t is unsigned, hence this optimisation */
+			if (--width > sizeof(buf) - 2)
+				width = sizeof(buf) - 2;
+			width++;
 #endif
-                flags |= SIGNOK | NDIGITS | DPTOK | EXPOK;
-                for (p = buf; width; width--) {
-                    c = *fp->_p;
-                    /*
-                     * This code mimicks the integer conversion
-                     * code, but is much simpler.
-                     */
-                    switch (c) {
+			flags |= SIGNOK | NDIGITS | DPTOK | EXPOK;
+			for (p = buf; width; width--) {
+				c = *fp->_p;
+				/*
+				 * This code mimicks the integer conversion
+				 * code, but is much simpler.
+				 */
+				switch (c) {
 
-                        case '0': case '1': case '2': case '3':
-                        case '4': case '5': case '6': case '7':
-                        case '8': case '9':
-                            flags &= ~(SIGNOK | NDIGITS);
-                            goto fok;
+				case '0': case '1': case '2': case '3':
+				case '4': case '5': case '6': case '7':
+				case '8': case '9':
+					flags &= ~(SIGNOK | NDIGITS);
+					goto fok;
 
-                        case '+': case '-':
-                            if (flags & SIGNOK) {
-                                flags &= ~SIGNOK;
-                                goto fok;
-                            }
-                            break;
-                        case '.':
-                            if (flags & DPTOK) {
-                                flags &= ~(SIGNOK | DPTOK);
-                                goto fok;
-                            }
-                            break;
-                        case 'e': case 'E':
-                            /* no exponent without some digits */
-                            if ((flags&(NDIGITS|EXPOK)) == EXPOK) {
-                                flags =
-                                        (flags & ~(EXPOK|DPTOK)) |
-                                        SIGNOK | NDIGITS;
-                                goto fok;
-                            }
-                            break;
-                    }
-                    break;
-                    fok:
-                    *p++ = c;
-                    if (--fp->_r > 0)
-                        fp->_p++;
-                    else if (__srefill(fp))
-                        break;	/* EOF */
-                }
-                /*
-                 * If no digits, might be missing exponent digits
-                 * (just give back the exponent) or might be missing
-                 * regular digits, but had sign and/or decimal point.
-                 */
-                if (flags & NDIGITS) {
-                    if (flags & EXPOK) {
-                        /* no digits at all */
-                        while (p > buf)
-                            ungetc(*(u_char *)--p, fp);
-                        goto match_failure;
-                    }
-                    /* just a bad exponent (e and maybe sign) */
-                    c = *(u_char *)--p;
-                    if (c != 'e' && c != 'E') {
-                        (void) ungetc(c, fp);/* sign */
-                        c = *(u_char *)--p;
-                    }
-                    (void) ungetc(c, fp);
-                }
-                if ((flags & SUPPRESS) == 0) {
-                    double res;
+				case '+': case '-':
+					if (flags & SIGNOK) {
+						flags &= ~SIGNOK;
+						goto fok;
+					}
+					break;
+				case '.':
+					if (flags & DPTOK) {
+						flags &= ~(SIGNOK | DPTOK);
+						goto fok;
+					}
+					break;
+				case 'e': case 'E':
+					/* no exponent without some digits */
+					if ((flags&(NDIGITS|EXPOK)) == EXPOK) {
+						flags =
+						    (flags & ~(EXPOK|DPTOK)) |
+						    SIGNOK | NDIGITS;
+						goto fok;
+					}
+					break;
+				}
+				break;
+		fok:
+				*p++ = c;
+				if (--fp->_r > 0)
+					fp->_p++;
+				else if (__srefill(fp))
+					break;	/* EOF */
+			}
+			/*
+			 * If no digits, might be missing exponent digits
+			 * (just give back the exponent) or might be missing
+			 * regular digits, but had sign and/or decimal point.
+			 */
+			if (flags & NDIGITS) {
+				if (flags & EXPOK) {
+					/* no digits at all */
+					while (p > buf)
+						ungetc(*(u_char *)--p, fp);
+					goto match_failure;
+				}
+				/* just a bad exponent (e and maybe sign) */
+				c = *(u_char *)--p;
+				if (c != 'e' && c != 'E') {
+					(void) ungetc(c, fp);/* sign */
+					c = *(u_char *)--p;
+				}
+				(void) ungetc(c, fp);
+			}
+			if ((flags & SUPPRESS) == 0) {
+				double res;
 
-                    *p = 0;
-                    res = strtod(buf,(char **) NULL);
-                    if (flags & LONG)
-                        *va_arg(ap, double *) = res;
-                    else
-                        *va_arg(ap, float *) = res;
-                    nassigned++;
-                }
-                nread += p - buf;
-                break;
+				*p = 0;
+				res = strtod(buf,(char **) NULL);
+				if (flags & LONG)
+					*va_arg(ap, double *) = res;
+				else
+					*va_arg(ap, float *) = res;
+				nassigned++;
+			}
+			nread += p - buf;
+			break;
 #endif /* FLOATING_POINT */
         }
     }
@@ -589,7 +831,6 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
     match_failure:
     return (nassigned);
 }
-
 
 int	 scanf(const char *fmt, ...)
 {
