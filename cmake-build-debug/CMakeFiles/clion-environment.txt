@@ -1,0 +1,2 @@
+Options: 
+CMake: 3.7.2@/home/huz/Application/clion-2017.1/bin/cmake/bin/cmake

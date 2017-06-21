@@ -1,0 +1,2 @@
+/home/huz/xv6-improved/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/huz/xv6-improved/cmake-build-debug/CMakeFiles/edit_cache.dir

@@ -9,6 +9,7 @@
 #include "xv6/param.h"
 #include "xv6/stat.h"
 #include "xv6/mmu.h"
+#include "xv6/signal.h"
 #include "xv6/proc.h"
 #include "xv6/fs.h"
 #include "xv6/spinlock.h"
