@@ -3,7 +3,8 @@
 #include <string.h>
 #include <xv6/sys/socket.h>
 #include <xv6/netinet/in.h>
-//#include <unistd.h>
+
+typedef int ssize_t;
 
 #define true 1
 #define false 0
@@ -25,6 +26,11 @@ struct sockaddr_in worker_addr = {
     }
 };
 
+void perror(char* str)
+{
+   puts(str);
+}
+
 void invert_str(char* str, unsigned int length)
 {   for (unsigned int i=0;i<length/2;i++)
     {   char tmp = str[i];
@@ -40,12 +46,12 @@ void master_proc()
 
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock==-1)
-    {   perror("[udp-test master] Socket creation error");
+    {  perror("[udp-test master] Socket creation error");
         exit(1);
     }
     int status = bind(sock, (struct sockaddr*)(&master_addr), sizeof(master_addr));
     if (status==-1)
-    {   perror("[udp-test master] Bind error");
+    {  perror("[udp-test master] Bind error");
         exit(2);
     }
 

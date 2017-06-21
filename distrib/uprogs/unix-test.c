@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <sys/un.h>
+#include <xv6/sys/socket.h>
+#include <xv6/sys/un.h>
 //#include <unistd.h>
 
 #define true 1
@@ -32,12 +32,12 @@ void master_proc()
     sleep(2);
     int sock = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (sock==-1)
-    {   perror("[unix-test master] Socket creation error");
+    {   //perror("[unix-test master] Socket creation error");
         exit(1);
     }
     int status = bind(sock, (struct sockaddr*)(&master_addr), sizeof(master_addr));
     if (status==-1)
-    {   perror("[unix-test master] Bind error");
+    {   //perror("[unix-test master] Bind error");
         exit(2);
     }
 
@@ -57,12 +57,12 @@ void worker_proc()
 {
     int sock = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (sock==-1)
-    {   perror("[unix-test worker] Socket creation error");
+    {   //perror("[unix-test worker] Socket creation error");
         exit(1);
     }
     int status = bind(sock, (struct sockaddr*)(&worker_addr), sizeof(worker_addr));
     if (status==-1)
-    {   perror("[unix-test worker] Bind error");
+    {   //perror("[unix-test worker] Bind error");
         exit(2);
     }
 

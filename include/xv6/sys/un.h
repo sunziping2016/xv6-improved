@@ -1,5 +1,5 @@
 #pragma once
-#include <sys/socket.h>
+#include <xv6/sys/socket.h>
 
 #define XV6_UNIX_SOCK_PATH_MAX 108
 

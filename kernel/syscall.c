@@ -98,6 +98,7 @@ extern int sys_setcrtc(void);
 extern int sys_getcurpos(void);
 extern int sys_setcurpos(void);
 extern int sys_gettime(void);
+extern int sys_sockcall(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]    sys_fork,
@@ -126,6 +127,7 @@ static int (*syscalls[])(void) = {
     [SYS_getcurpos] sys_getcurpos,
     [SYS_setcurpos] sys_setcurpos,
     [SYS_gettime] sys_gettime,
+    [SYS_sockcall] sys_sockcall,
 };
 
 void syscall(void)
