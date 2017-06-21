@@ -1,25 +1,11 @@
-/** @file
- * @brief Memory pool implementation
- * @author Mengyang Lv
- * @date June 22, 2016
- * @version 1.0.0
- */
-
-//[ Header Files ]
-//Xv6 kernel extra
 #include "mem_pool.h"
 #include "edefs.h"
-//Xv6 kernel
 #include "xv6/defs.h"
 
-//[ Constants ]
-//Memory pool parameters
 #define BLOCK_POINTER_NUMBER 4
 #define BLOCK_BYTE_NUMBER 1
 #define SIZE_OF_BLOCK (sizeof(struct memblock))
 
-//[ Functions ]
-//Initialize memory pool
 void pool_init(struct mem_pool *pool, byte *m, uint s)
 {
     acquire(&pool->lock);
@@ -39,7 +25,6 @@ void pool_init(struct mem_pool *pool, byte *m, uint s)
     release(&pool->lock);
 }
 
-//Allocate memory from pool
 void* pool_alloc(struct mem_pool *pool, int size)
 {
     acquire(&pool->lock);
@@ -85,7 +70,6 @@ void* pool_alloc(struct mem_pool *pool, int size)
     return allocmem;
 }
 
-//Release allocated memory
 int pool_free(struct mem_pool *pool, void *p)
 {
     acquire(&pool->lock);
@@ -94,7 +78,6 @@ int pool_free(struct mem_pool *pool, void *p)
         struct memblock *block = (struct memblock*)(p - SIZE_OF_BLOCK);
         if (block->start == p && block->status == 1) {
             block->status = 0;
-            // merge next block
             if (block->nextblock != 0 && block->nextblock->status == 0) {
                 if (block->nextblock->nextblock == 0) {
                     block->end = block->nextblock->end;
@@ -105,7 +88,6 @@ int pool_free(struct mem_pool *pool, void *p)
                     block->nextblock = block->nextblock->nextblock;
                 }
             }
-            //merge prev block
             if (block->prevblock != 0 && block->prevblock->status == 0) {
                 if (block->nextblock == 0) {
                     block->prevblock->end = block->end;

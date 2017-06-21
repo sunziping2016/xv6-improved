@@ -1,10 +1,5 @@
-
-
-//[ Header Files ]
-//Xv6 kernel
 #include "xv6/types.h"
 #include "xv6/defs.h"
-//Xv6 kernel extra
 #include "etypes.h"
 #include "edefs.h"
 #include "mem_pool.h"
@@ -12,142 +7,52 @@
 #include "inet.h"
 #include "socket.h"
 
-//[ Constants ]
-/**
- * UDP protocol memory pool size
- */
 #define INET_DGRAM_POOL_SIZE 65536
-/**
- * Message queue maximum size
- */
 #define MSG_QUEUE_MAX_SIZE 4096
-/**
- * Maximum message length
- */
 #define INET_MAX_MSG_LEN 1024
 
-//[ Types ]
-/**
- * UDP datagram type
- */
 struct inet_dgram_msg
-{   /**
-     * Source IP
-     */
+{ 
     in_addr_t src_ip;
-    /**
-     * Source port
-     */
     in_port_t src_port;
-    /**
-     * Data length
-     */
     uint32_t data_len;
-    /**
-     * Data
-     */
     char* data;
-
-    /**
-     * Next message
-     */
     struct inet_dgram_msg* next_msg;
 };
 
-/**
- * UDP socket type
- */
 struct inet_dgram_socket
 {   int domain;
     int type;
-
-    /**
-     * IP
-     */
     in_addr_t ip;
-    /**
-     * Port number
-     */
     in_port_t port;
-    /**
-     * Binded or not
-     */
     bool binded;
-
-    /**
-     * Message queue begin
-     */
     struct inet_dgram_msg* msg_queue_begin;
-    /**
-     * Message queue end
-     */
     struct inet_dgram_msg* msg_queue_end;
-    /**
-     * Message queue size
-     */
     uint32_t msg_queue_size;
-    /**
-     * Socket lock
-     */
     struct spinlock lock;
-
-    /**
-     * Next UDP socket
-     */
     struct inet_dgram_socket* next_sock;
-    /**
-     * Previous UDP socket
-     */
     struct inet_dgram_socket* prev_sock;
 };
 
-//[ Variables ]
-/**
- * UDP socket memory pool buffer
- */
 static char inet_dgram_mem[INET_DGRAM_POOL_SIZE];
-/**
- * UDP socket memory pool
- */
 static struct mem_pool inet_dgram_pool;
-/**
- * Socket linked list begin
- */
 static struct inet_dgram_socket* inet_dgram_begin = NULL;
-/**
- * Socket linked list end
- */
 static struct inet_dgram_socket* inet_dgram_end = NULL;
-/**
- * Socket linked list lock
- */
 struct spinlock inet_dgram_lock;
 
-//[ Functions ]
-/**
- * Create UDP socket.
- *
- * @param sock_file Socket file descriptor object.
- * @param _param (Dummy)
- * @return Zero for success, or negative error number for failure.
- */
 static int inet_dgram_create(struct file* sock_file, void* _param)
-{   //Allocate memory for UDP socket object
+{   
     struct inet_dgram_socket* sock = pool_alloc(&inet_dgram_pool, sizeof(struct inet_dgram_socket));
-    //Memory allocation failed
+   
     if (!sock)
         return -1*ENOMEM;
-
-    //Initialize socket lock
     initlock(&sock->lock, "sock");
-    //Initialize socket object
     sock->domain = AF_INET;
     sock->type = SOCK_DGRAM;
     sock->binded = false;
     sock->msg_queue_begin = sock->msg_queue_end = NULL;
     sock->msg_queue_size = 0;
     sock->next_sock = sock->prev_sock = NULL;
-    //Insert into socket linked list
     acquire(&inet_dgram_lock);
     if (!inet_dgram_begin)
         inet_dgram_begin = inet_dgram_end = sock;
@@ -157,33 +62,21 @@ static int inet_dgram_create(struct file* sock_file, void* _param)
         inet_dgram_end = sock;
     }
     release(&inet_dgram_lock);
-    //Set socket object
     sock_file->sock = (struct socket*)sock;
 
-    //Return 0 for success
     return 0;
 }
 
-/**
- * Bind UDP socket to given IP and port
- *
- * @param sock_file Socket file descriptor object.
- * @param _param UDP socket binding parameters.
- * @return Zero for success, or negative error number for failure.
- */
 static int inet_dgram_bind(struct file* sock_file, void* _param)
-{   struct sockcall_bind_param* param = (struct sockcall_bind_param*)_param;
-    //Bind address
+{   
+    struct sockcall_bind_param* param = (struct sockcall_bind_param*)_param;
     struct sockaddr_in* addr = (struct sockaddr_in*)param->address;
-    //Socket object
     struct inet_dgram_socket* sock = (struct inet_dgram_socket*)sock_file->sock;
 
-    //Check if the socket is already binded
     acquire(&sock->lock);
     if (sock->binded)
         return -1*EALREADY;
 
-    //Walk up the whole socket linked list and check if the IP and the port is already in use
     acquire(&inet_dgram_lock);
     struct inet_dgram_socket* current_sock = inet_dgram_begin;
     while (current_sock)
