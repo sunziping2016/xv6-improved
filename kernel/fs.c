@@ -449,8 +449,7 @@ readi(struct inode *ip, char *dst, uint off, uint n)
     uint tot, m;
     struct buf *bp;
     struct dirent proc;
-    int rootflag=0;
-    int nm;
+
     if(ip->dev==PROCFSDEV)
     {
       return readproc(ip,dst,off,n);
@@ -461,20 +460,23 @@ readi(struct inode *ip, char *dst, uint off, uint n)
             return -1;
         return devsw[ip->major].read(ip, dst, n);
     }
-    
-    if(ip->dev==ROOTDEV&&ip->inum==ROOTINO)
-      rootflag=1;
       
     if (off > ip->size || off + n < off)
         return -1;
     if (off + n > ip->size)
       n = ip->size - off;
-      
+    
     for (tot = 0; tot < n; tot += m, off += m, dst += m) {
         bp = bread(ip->dev, bmap(ip, off / BSIZE));
         m = min(n - tot, BSIZE - off % BSIZE);   
         memmove(dst, bp->data + off % BSIZE, m);
         brelse(bp);
+    }
+    if(ip->dev==ROOTDEV&&ip->inum==ROOTINO&&n==sizeof(struct dirent)&&((struct dirent*)dst-1)->inum==0&&off==ip->size)
+    {
+      proc.inum=1;
+      strncpy(proc.name,"proc",5);
+      memmove(dst-sizeof(struct dirent), (char*)&proc, sizeof(struct dirent));
     }
     return n;
 }
