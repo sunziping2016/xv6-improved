@@ -10,6 +10,8 @@
 #define MDEVHDAINFO 2
 #define NCONSOLE 1
 #define MCONSOLE 1
+#define NDEVSOUND 1
+#define MDEVSOUND 2
 #define NDEVNULL 1
 #define MDEVNULL 3
 #define NDEVZERO 1
@@ -33,6 +35,7 @@ main(void)
         mknod("console", NCONSOLE, MCONSOLE);
         open("console", O_RDWR);
     }
+    mknod("sound", NDEVSOUND, MDEVSOUND);
     mknod("null",NDEVNULL,MDEVNULL);
     mknod("zero",NDEVZERO,MDEVZERO);
     mknod("random",NDEVRANDOM,MDEVRANDOM);

@@ -10,6 +10,8 @@ OBJS = \
 	devrandom.o\
 	devnull.o\
 	devhda.o\
+	sound.o\
+	devsound.o\
 	devhdainfo.o\
 	entry.o\
 	exec.o\

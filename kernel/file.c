@@ -144,7 +144,7 @@ filewrite(struct file *f, char *addr, int n)
                 f->off += r;
             iunlock(f->ip);
             end_op();
-
+            //cprintf("ok %s %d, %d\n",r , n1);
             if (r < 0)
                 break;
             if (r != n1)

@@ -28,9 +28,10 @@ main(void)
     consoleinit();   // console hardware
     nullinit();      // /dev/null
     zeroinit();      // /dev/zero
+    soundinit();     // /dev/sound
     randominit();    // /dev/random /dev/urandom
     hdainit();       // /dev/hda
-    hdainfoinit();
+    hdainfoinit();   // /dev/hdainfo
     uartinit();      // serial port
     pinit();         // process table
     tvinit();        // trap vectors

@@ -35,12 +35,15 @@ struct devsw {
 
 extern struct devsw devsw[][MDEV];
 
+
 #define NDEVHDA  2
 #define MDEVHDA  1
 #define NDEVHDAINFO 2
 #define MDEVHDAINFO 2
 #define NCONSOLE 1
 #define MCONSOLE 1
+#define NDEVSOUND 1
+#define MDEVSOUND 2
 #define NDEVNULL 1
 #define MDEVNULL 3
 #define NDEVZERO 1

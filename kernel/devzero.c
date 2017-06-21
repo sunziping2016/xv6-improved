@@ -24,7 +24,7 @@ static struct {
    iunlock(ip);
    acquire(&cons.lock);
    uint target;
-   target;
+   target = n;
    if(cons.r == 0)
    {
      while(n>0)
