@@ -1,10 +1,12 @@
+#include <xv6/user.h>
 #include <stdio.h>
 #include <float.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <ctype.h>
+#include <limits.h>
 
-#if 0
+#if 1
 
 #define	BUF		513	/* Maximum length of numeric string. */
 
@@ -45,107 +47,7 @@
 #define u_char unsigned char
 #define u_long unsigned long
 
-static u_char *__sccl();
-
-void (*__cleanup)();
-
-int _fwalk(register int (*function)())
-{
-    register FILE *fp;
-    register int n, ret;
-    register struct glue *g;
-
-    ret = 0;
-    for (g = &__sglue; g != NULL; g = g->next)
-        for (fp = g->iobs, n = g->niobs; --n >= 0; fp++)
-            if (fp->_flags != 0)
-                ret |= (*function)(fp);
-    return (ret);
-}
-
-void
-_cleanup()
-{
-    /* (void) _fwalk(fclose); */
-    (void) _fwalk(__sflush);		/* `cheating' */
-}
-
-void __sinit()
-{
-    /* make sure we clean up on exit */
-    __cleanup = _cleanup;		/* conservative */
-    __sdidinit = 1;
-}
-
-int __srefill(register FILE *fp)
-{
-
-    /* make sure stdio is set up */
-    if (!__sdidinit)
-        __sinit();
-
-    fp->_r = 0;		/* largely a convenience for callers */
-
-    /* SysV does not make this test; take it out for compatibility */
-    if (fp->_flags & __SEOF)
-        return (EOF);
-
-    /* if not already reading, have to be reading and writing */
-    if ((fp->_flags & __SRD) == 0) {
-        if ((fp->_flags & __SRW) == 0) {
-            errno = EBADF;
-            return (EOF);
-        }
-        /* switch to reading */
-        if (fp->_flags & __SWR) {
-            if (__sflush(fp))
-                return (EOF);
-            fp->_flags &= ~__SWR;
-            fp->_w = 0;
-            fp->_lbfsize = 0;
-        }
-        fp->_flags |= __SRD;
-    } else {
-        /*
-         * We were reading.  If there is an ungetc buffer,
-         * we must have been reading from that.  Drop it,
-         * restoring the previous buffer (if any).  If there
-         * is anything in that buffer, return.
-         */
-        if (HASUB(fp)) {
-            FREEUB(fp);
-            if ((fp->_r = fp->_ur) != 0) {
-                fp->_p = fp->_up;
-                return (0);
-            }
-        }
-    }
-
-    if (fp->_bf._base == NULL)
-        __smakebuf(fp);
-
-    /*
-     * Before reading from a line buffered or unbuffered file,
-     * flush all line buffered output files, per the ANSI C
-     * standard.
-     */
-    if (fp->_flags & (__SLBF|__SNBF))
-        (void) _fwalk(lflush);
-    fp->_p = fp->_bf._base;
-    fp->_r = (*fp->_read)(fp->_cookie, (char *)fp->_p, fp->_bf._size);
-    fp->_flags &= ~__SMOD;	/* buffer contents are again pristine */
-    if (fp->_r <= 0) {
-        if (fp->_r == 0)
-            fp->_flags |= __SEOF;
-        else {
-            fp->_r = 0;
-            fp->_flags |= __SERR;
-        }
-        return (EOF);
-    }
-    return (0);
-}
-
+extern  __srefill(register FILE *fp);
 
 long strtol(const char *nptr, char **endptr, register int base)
 {
@@ -216,7 +118,7 @@ long strtol(const char *nptr, char **endptr, register int base)
     }
     if (any < 0) {
         acc = neg ? LONG_MIN : LONG_MAX;
-        errno = ERANGE;
+        //errno = ERANGE;
     } else if (neg)
         acc = -acc;
     if (endptr != 0)
@@ -272,13 +174,150 @@ unsigned long strtoul(const char *nptr, char **endptr, register int base)
     }
     if (any < 0) {
         acc = ULONG_MAX;
-        errno = ERANGE;
+        //errno = ERANGE;
     } else if (neg)
         acc = -acc;
     if (endptr != 0)
         *endptr = any ? (char *)s - 1 : (char *)nptr;
     return (acc);
 }
+
+static u_char *__sccl(register char *tab, register u_char *fmt)
+{
+    register int c, n, v;
+
+    /* first `clear' the whole table */
+    c = *fmt++;		/* first char hat => negated scanset */
+    if (c == '^') {
+        v = 1;		/* default => accept */
+        c = *fmt++;	/* get new first char */
+    } else
+        v = 0;		/* default => reject */
+    /* should probably use memset here */
+    for (n = 0; n < 256; n++)
+        tab[n] = v;
+    if (c == 0)
+        return (fmt - 1);/* format ended before closing ] */
+
+    /*
+     * Now set the entries corresponding to the actual scanset
+     * to the opposite of the above.
+     *
+     * The first character may be ']' (or '-') without being special;
+     * the last character may be '-'.
+     */
+    v = 1 - v;
+    for (;;) {
+        tab[c] = v;		/* take character c */
+        doswitch:
+        n = *fmt++;		/* and examine the next */
+        switch (n) {
+
+            case 0:			/* format ended too soon */
+                return (fmt - 1);
+
+            case '-':
+                /*
+                 * A scanset of the form
+                 *	[01+-]
+                 * is defined as `the digit 0, the digit 1,
+                 * the character +, the character -', but
+                 * the effect of a scanset such as
+                 *	[a-zA-Z0-9]
+                 * is implementation defined.  The V7 Unix
+                 * scanf treats `a-z' as `the letters a through
+                 * z', but treats `a-a' as `the letter a, the
+                 * character -, and the letter a'.
+                 *
+                 * For compatibility, the `-' is not considerd
+                 * to define a range if the character following
+                 * it is either a close bracket (required by ANSI)
+                 * or is not numerically greater than the character
+                 * we just stored in the table (c).
+                 */
+                n = *fmt;
+                if (n == ']' || n < c) {
+                    c = '-';
+                    break;	/* resume the for(;;) */
+                }
+                fmt++;
+                do {		/* fill in the range */
+                    tab[++c] = v;
+                } while (c < n);
+#if 1	/* XXX another disgusting compatibility hack */
+                /*
+                 * Alas, the V7 Unix scanf also treats formats
+                 * such as [a-c-e] as `the letters a through e'.
+                 * This too is permitted by the standard....
+                 */
+                goto doswitch;
+#else
+            c = *fmt++;
+			if (c == 0)
+				return (fmt - 1);
+			if (c == ']')
+				return (fmt);
+#endif
+                break;
+
+            case ']':		/* end of scanset */
+                return (fmt);
+
+            default:		/* just another character */
+                c = n;
+                break;
+        }
+    }
+    /* NOTREACHED */
+}
+
+
+int fread(void *buf, size_t size, size_t count, register FILE *fp)
+{
+    register size_t resid;
+    register char *p;
+    register int r;
+    int i, j;
+    size_t total;
+
+    if ((resid = count * size) == 0)
+        return (resid);
+    if (fp->reserve < 0)
+    {
+        //myprintf("eeeee\n");
+        fp->reserve = 0;
+    }
+    total = resid;
+    p = buf;
+    while (resid > (r = fp->reserve)) {
+        //bcopy(fp->cur, p, (size_t)r);
+
+        for(i = 0; i < r; ++i)
+        {
+            j = (fp->cur + i) % fp->buffer_size;
+            p[i] = fp->buffer[j];
+        }
+
+        fp->cur = (fp->cur + r) % fp->buffer_size;
+        /* fp->_r = 0 ... done in __srefill */
+        p += r;
+        resid -= r;
+        if (__srefill(fp)) {
+            /* no more input: return partial result */
+            return ((total - resid) / size);
+        }
+    }
+    //(void) bcopy((void *)fp->cur, (void *)p, resid);
+    for(i = 0; i < resid; ++i)
+    {
+        j = (fp->cur + i) % fp->buffer_size;
+        p[i] = fp->buffer[j];
+    }
+    fp->reserve -= resid;
+    fp->cur = (fp->cur + resid) % fp->buffer_size;
+    return (count);
+}
+
 
 int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 {
@@ -310,11 +349,11 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
             return (nassigned);
         if (isspace(c)) {
             for (;;) {
-                if (fp->_r <= 0 && __srefill(fp))
+                if (fp->reserve <= 0 && __srefill(fp))
                     return (nassigned);
-                if (!isspace(*fp->_p))
+                if (!isspace(fp->buffer[fp->cur]))
                     break;
-                nread++, fp->_r--, fp->_p++;
+                nread++, fp->reserve--, fp->cur = (fp->cur + 1) % fp->buffer_size;
             }
             continue;
         }
@@ -330,11 +369,11 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
         switch (c) {
             case '%':
             literal:
-                if (fp->_r <= 0 && __srefill(fp))
+                if (fp->reserve <= 0 && __srefill(fp))
                     goto input_failure;
-                if (*fp->_p != c)
+                if (fp->buffer[fp->cur] != c)
                     goto match_failure;
-                fp->_r--, fp->_p++;
+                fp->reserve--, fp->cur = (fp->cur + 1) % fp->buffer_size;
                 nread++;
                 continue;
 
@@ -405,12 +444,12 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 
 #ifdef FLOATING_POINT
             case 'E':	/* compat   XXX */
-		case 'F':	/* compat */
-			flags |= LONG;
+		    case 'F':	/* compat */
+			    flags |= LONG;
 			/* FALLTHROUGH */
-		case 'e': case 'f': case 'g':
-			c = CT_FLOAT;
-			break;
+		    case 'e': case 'f': case 'g':
+			    c = CT_FLOAT;
+			    break;
 #endif
 
             case 's':
@@ -464,7 +503,7 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
         /*
          * We have a conversion that requires input.
          */
-        if (fp->_r <= 0 && __srefill(fp))
+        if (fp->reserve <= 0 && __srefill(fp))
             goto input_failure;
 
         /*
@@ -472,10 +511,10 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
          * that suppress this.
          */
         if ((flags & NOSKIP) == 0) {
-            while (isspace(*fp->_p)) {
+            while (isspace(fp->buffer[fp->cur])) {
                 nread++;
-                if (--fp->_r > 0)
-                    fp->_p++;
+                if (--fp->reserve > 0)
+                    fp->cur = (fp->cur + 1) % fp->buffer_size;
                 else if (__srefill(fp))
                     goto input_failure;
             }
@@ -490,7 +529,6 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
          * Do the conversion.
          */
         switch (c) {
-
             case CT_CHAR:
                 /* scan arbitrary characters (sets NOSKIP) */
                 if (width == 0)
@@ -498,10 +536,10 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
                 if (flags & SUPPRESS) {
                     size_t sum = 0;
                     for (;;) {
-                        if ((n = fp->_r) < width) {
+                        if ((n = fp->reserve) < width) {
                             sum += n;
                             width -= n;
-                            fp->_p += n;
+                            fp->cur = (fp->cur + n) % fp->buffer_size;
                             if (__srefill(fp)) {
                                 if (sum == 0)
                                     goto input_failure;
@@ -509,8 +547,8 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
                             }
                         } else {
                             sum += width;
-                            fp->_r -= width;
-                            fp->_p += width;
+                            fp->reserve -= width;
+                            fp->cur = (fp->cur + width) % fp->buffer_size;
                             break;
                         }
                     }
@@ -533,11 +571,11 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
                 /* take only those things in the class */
                 if (flags & SUPPRESS) {
                     n = 0;
-                    while (ccltab[*fp->_p]) {
-                        n++, fp->_r--, fp->_p++;
+                    while (ccltab[fp->buffer[fp->cur]]) {
+                        n++, fp->reserve--, fp->cur = (fp->cur + 1) % fp->buffer_size;
                         if (--width == 0)
                             break;
-                        if (fp->_r <= 0 && __srefill(fp)) {
+                        if (fp->reserve <= 0 && __srefill(fp)) {
                             if (n == 0)
                                 goto input_failure;
                             break;
@@ -547,12 +585,13 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
                         goto match_failure;
                 } else {
                     p0 = p = va_arg(ap, char *);
-                    while (ccltab[*fp->_p]) {
-                        fp->_r--;
-                        *p++ = *fp->_p++;
+                    while (ccltab[fp->buffer[fp->cur]]) {
+                        fp->reserve--;
+                        *p++ = fp->buffer[fp->cur];
+                        fp->cur = (fp->cur + 1) % fp->buffer_size;
                         if (--width == 0)
                             break;
-                        if (fp->_r <= 0 && __srefill(fp)) {
+                        if (fp->reserve <= 0 && __srefill(fp)) {
                             if (p == p0)
                                 goto input_failure;
                             break;
@@ -569,26 +608,28 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 
             case CT_STRING:
                 /* like CCL, but zero-length string OK, & no NOSKIP */
+
                 if (width == 0)
                     width = ~0;
                 if (flags & SUPPRESS) {
                     n = 0;
-                    while (!isspace(*fp->_p)) {
-                        n++, fp->_r--, fp->_p++;
+                    while (!isspace(fp->buffer[fp->cur])) {
+                        n++, fp->reserve--, fp->cur = (fp->cur + 1) % fp->buffer_size;
                         if (--width == 0)
                             break;
-                        if (fp->_r <= 0 && __srefill(fp))
+                        if (fp->reserve <= 0 && __srefill(fp))
                             break;
                     }
                     nread += n;
                 } else {
                     p0 = p = va_arg(ap, char *);
-                    while (!isspace(*fp->_p)) {
-                        fp->_r--;
-                        *p++ = *fp->_p++;
+                    while (!isspace(fp->buffer[fp->cur])) {
+                        fp->reserve--;
+                        *p++ = fp->buffer[fp->cur];
+                        fp->cur = (fp->cur + 1) % fp->buffer_size;
                         if (--width == 0)
                             break;
-                        if (fp->_r <= 0 && __srefill(fp))
+                        if (fp->reserve <= 0 && __srefill(fp))
                             break;
                     }
                     *p = 0;
@@ -610,7 +651,7 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 #endif
                 flags |= SIGNOK | NDIGITS | NZDIGITS;
                 for (p = buf; width; width--) {
-                    c = *fp->_p;
+                    c = fp->buffer[fp->cur];
                     /*
                      * Switch on the character; `goto ok'
                      * if we accept it as a part of number.
@@ -694,8 +735,8 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
                      * c is legal: store it and look at the next.
                      */
                     *p++ = c;
-                    if (--fp->_r > 0)
-                        fp->_p++;
+                    if (--fp->reserve > 0)
+                        fp->cur = (fp->cur + 1) % fp->buffer_size;
                     else if (__srefill(fp))
                         break;		/* EOF */
                 }
@@ -747,7 +788,7 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 #endif
 			flags |= SIGNOK | NDIGITS | DPTOK | EXPOK;
 			for (p = buf; width; width--) {
-				c = *fp->_p;
+				c = fp->buffer[fp->cur];
 				/*
 				 * This code mimicks the integer conversion
 				 * code, but is much simpler.
@@ -785,8 +826,8 @@ int __svfscanf(register FILE *fp, char const *fmt0, va_list ap)
 				break;
 		fok:
 				*p++ = c;
-				if (--fp->_r > 0)
-					fp->_p++;
+				if (--fp->reserve > 0)
+                    fp->cur = (fp->cur + 1) % fp->buffer_size;
 				else if (__srefill(fp))
 					break;	/* EOF */
 			}

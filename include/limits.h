@@ -73,4 +73,6 @@
 #define	LINE_MAX	2048	/* max length in bytes of an input line */
 #define	RE_DUP_MAX	255	/* max repeated RE's using interval notation */
 
+#endif
+
 #endif //LIMITS_H

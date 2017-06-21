@@ -9,13 +9,14 @@
 #define	__SWR	0x0008		/* OK to write */
 /* RD and WR are never simultaneously asserted */
 #define	__SRW	0x0010		/* open for reading & writing */
-#define	BUFSIZ	4
+#define	BUFSIZ	1024
 
 typedef struct {
     int fd;
     int buffer_size;
     int buffer_end;
     int cur;
+    int reserve;
     char *buffer;
     short flags;
 } FILE;
@@ -28,8 +29,7 @@ extern FILE _std_files[];
 int	__srget (FILE *);
 int __sputc (int _c, FILE *_p);
 
-#define	getc(fp) __sgetc(fp)
-#define fgetc(fp) __sgetc(fp)
+
 
 #define putc(x, fp)	__sputc(x, fp)
 #define fputc(x, fp) __sputc(x, fp)
@@ -37,6 +37,9 @@ int __sputc (int _c, FILE *_p);
 #define	getchar()	getc(stdin)
 
 #define	putchar(x)	putc(x, stdout)
+
+#define	getc(fp) __sgetc(fp)
+#define fgetc(fp) __sgetc(fp)
 
 int myprintf(char const *fmt, ...);
 int fprintf(FILE *fp, const char *fmt, ...);
@@ -48,7 +51,7 @@ FILE *fopen(const char *file, const char *mode);
 int fclose(FILE *fp);
 int ungetc(int ch, FILE *stream);
 
-//int	 scanf(const char *, ...);
+int	 scanf(const char *, ...);
 
 
 double strtod(const char *s00, char **se);

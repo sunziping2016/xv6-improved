@@ -7,9 +7,9 @@
 static char stdin_buffer[BUFSIZ];
 
 FILE _std_files[3] = {
-        {0, BUFSIZ, 0, 0, stdin_buffer, __SRD},
-        {1, 0, 0, 0, 0, __SWR},
-        {2, 0, 0, 0, 0, __SWR},
+        {0, BUFSIZ, 0, 0, 0, stdin_buffer, __SRD},
+        {1, 0, 0, 0, 0, 0, __SWR},
+        {2, 0, 0, 0, 0, 0, __SWR},
 };
 
 #define        MAXEXP          308
@@ -2865,27 +2865,43 @@ int fputs(const char *s, FILE *fp)
     return (__sfvwrite(fp, &uio));
 }
 
-#include "xv6/user.h"
+
+int __srefill(register FILE *fp)
+{
+    int i;
+    char c;
+    if (!fp || fp->flags & __SWR)
+        return (EOF);
+    if(fp->reserve)
+        return 0;
+    for(i = 0; i < BUFSIZ / 2; ++i)
+    {
+        if((read(fp->fd, &c, 1)) < 1)
+            break;
+        //myprintf("%d    ", c);
+        fp->buffer[fp->buffer_end] = c;
+        fp->buffer_end = (fp->buffer_end + 1) % fp->buffer_size;
+        ++fp->reserve;
+        if(c == '\n' || c == '\r')
+            break;
+    }
+    //myprintf("out\n");
+    if(fp->reserve)
+        return 0;
+    return EOF;
+}
 
 int	__srget (FILE *fp)
 {
-    int i, cc;
     char c;
-    if(fp->cur != fp->buffer_end)
+    if(__srefill(fp) == 0)
     {
+        --fp->reserve;
         c = fp->buffer[fp->cur];
         fp->cur = (fp->cur + 1) % fp->buffer_size;
+        return c;
     }
-    else
-    {
-        cc = read(fp->fd, &c, 1);
-        if (cc < 1)
-            return EOF;
-        fp->buffer[fp->buffer_end] = c;
-        fp->buffer_end = (fp->buffer_end + 1) % fp->buffer_size;
-        fp->cur = fp->buffer_end;
-    }
-    return c;
+    return EOF;
 }
 
 int __sputc (int _c, FILE *_p)
@@ -2976,6 +2992,7 @@ FILE *fopen(const char *file, const char *mode)
         fp->buffer_end = 0;
         fp->buffer = malloc(fp->buffer_size * sizeof(char));
         fp->cur = 0;
+        fp->reserve = 0;
     }
     else
         fp->buffer = 0;
@@ -3022,5 +3039,6 @@ int ungetc(int ch, FILE *stream)
         return EOF;
     stream->buffer[prev] = ch;
     stream->cur = prev;
+    ++stream->reserve;
     return 0;
 }

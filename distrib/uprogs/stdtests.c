@@ -5,26 +5,12 @@ volatile int count = 0;
 
 int main(int argc, char *argv[])
 {
-    char a[128];
-    FILE *f = fopen("README", "r");
-    int i, j;
+    char a[128], b, c;
+    int t, i;
+    float fl;
 
-    for(i = 0; i < 3; ++i)
-    {
-        a[i] = fgetc(f);
-        for(j = 0; j < BUFSIZ; ++j)
-            putchar(f->buffer[j]);
-        putchar('\n');
-    }
+    scanf("%c %c %f %d %s", &b, &c, &fl, &t, a);
+    myprintf("%c  %c  %f  %d  %s\n", b, c, fl, t, a);
 
-    ungetc('.', f);
-    ungetc('.', f);
-
-    for(i = 3; i < 20; ++i)
-    {
-        a[i] = fgetc(f);
-    }
-    a[20] = 0;
-    puts(a);
     exit();
 }
