@@ -9,6 +9,7 @@ UPROGS = cat echo forktest grep init kill ln ls \
 
 ULIB = $(OUTDIR)/../ulib/ulib.a
 LIBC = $(OUTDIR)/../libc/libc.a
+START = _start.o
 _UPROGS = $(addprefix $(OUTDIR)/, $(UPROGS))
 
 all: $(_UPROGS)
@@ -22,8 +23,8 @@ $(LIBC): FORCE
 $(OUTDIR)/%.o: %.c | $(OUTDIR)
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(OUTDIR)/%: $(OUTDIR)/%.o $(ULIB) $(LIBC) | $(OUTDIR)
-	$(LD) $(LDFLAGS) -s -N -e main -Ttext 0 -o $@ $^
+$(OUTDIR)/%: $(OUTDIR)/%.o $(ULIB) $(LIBC) $(START) | $(OUTDIR)
+	$(LD) $(LDFLAGS) -s -N -e _start -Ttext 0 -o $@ $^
 
 install: $(_UPROGS)
 	mkdir -p $(TOP_SRCDIR)/build/fs
