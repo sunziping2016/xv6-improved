@@ -5,8 +5,8 @@
 #include "xv6/x86.h"
 
 //SOCKET usercall
-#include <sys/socket.h>
-#include <sys/syscall.h>
+#include "socket.h"
+#include <syscall.h>
 
 #include <stdint.h>
 #include <errno.h>
