@@ -4,9 +4,8 @@
 #define SEC_PER_DAY 86400
 int day_per_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
 
-char *int2str(int a)
+void int2str(int a, char *s)
 {
-    char s[20];
     int index;
     for(index = 0; index < 20; ++index)
     {
@@ -20,8 +19,7 @@ char *int2str(int a)
     }
     int length = strlen(s);
     index = 0;
-    while (1)
-    {
+    while (1) {
         char temp = s[index];
         s[index] = s[length - index - 1];
         s[length - index - 1] = temp;
@@ -29,7 +27,6 @@ char *int2str(int a)
         if (index >= length - index - 1)
             break;
     }
-    return s;
 }
 
 time_t time(time_t *arg)
@@ -63,6 +60,7 @@ clock_t clock()
 
 char *asctime(tm *time)
 {
+    char s[20] = "110";
     if (time == NULL)
         return NULL;
     int day_index = 0;
@@ -73,35 +71,41 @@ char *asctime(tm *time)
         if (i == 2 && ((time->year % 4 == 0 && time->year % 100 != 0) || (time->year % 400 == 0)))//Feb in leap year
             day_index += 1;
     }
-    int week = (time->year - 1 + (time->year - 1) / 4 + (time->year - 1) / 100 + (time->year - 1) / 400 + day_index) % 7;
-    char ascii_time[100]="";
+    day_index += time->day;
+    int m;
+    if (time->month <= 2)
+        m = time->month + 12;
+    else
+        m = time->month;
+    int week = ((time->year % 100) / 4 + (time->year % 100) + (time->year / 100) / 4 - 2 * (time->year / 100) + 26 * (m + 1) / 10 + time->day - 1) % 7;
+    static char ascii_time[100]="";
     switch(week)
     {
         case 0:
-            strcat(ascii_time,"Mon ");
+            strcat(ascii_time,"Sun ");
             break;
         case 1:
-            strcat(ascii_time,"Tue ");
+            strcat(ascii_time,"Mon ");
             break;
         case 2:
-            strcat(ascii_time,"Wed ");
+            strcat(ascii_time,"Tue ");
             break;
         case 3:
-            strcat(ascii_time,"Thu ");
+            strcat(ascii_time,"Wed ");
             break;
         case 4:
-            strcat(ascii_time,"Fri ");
+            strcat(ascii_time,"Thu ");
             break;
         case 5:
-            strcat(ascii_time,"Sat ");
+            strcat(ascii_time,"Fri ");
             break;
         case 6:
-            strcat(ascii_time,"Sun ");
+            strcat(ascii_time,"Sat ");
             break;
         default:
             break;
     }
-    switch(time->year)
+    switch(time->month)
     {
         case 1:
             strcat(ascii_time,"Jan ");
@@ -142,21 +146,27 @@ char *asctime(tm *time)
         default:
             break;
     }
-    strcat(ascii_time,int2str(time->day));
+    int2str(time->day,s);
+    strcat(ascii_time,s);
     strcat(ascii_time," ");
-    strcat(ascii_time,int2str(time->hour));
+    int2str(time->hour,s);
+    strcat(ascii_time,s);
     strcat(ascii_time,":");
-    strcat(ascii_time,int2str(time->minute));
+    int2str(time->minute,s);
+    strcat(ascii_time,s);
     strcat(ascii_time,":");
-    strcat(ascii_time,int2str(time->second));
+    int2str(time->second,s);
+    strcat(ascii_time,s);
     strcat(ascii_time," ");
-    strcat(ascii_time,int2str(time->year));
+    int2str(time->year,s);
+    strcat(ascii_time,s);
+    return ascii_time;
 }
 
 tm localtime(const time_t *time)
 {
     tm mtm;
-    int a = *time;
+    int a = *time + 28800;
     mtm.second = a % 60;
     mtm.minute = (a / 60) % 60;
     mtm.hour = (a / 3600) % 24;
@@ -198,7 +208,7 @@ tm localtime(const time_t *time)
         else
             break;
     }
-    day += total_day;
+    day += total_day - 1;
     mtm.year = year;
     mtm.month = month;
     mtm.day = day;

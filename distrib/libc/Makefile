@@ -3,7 +3,7 @@ include $(TOP_SRCDIR)/Makefile.common
 
 OUTDIR = $(BUILDDIR)/distrib/libc
 
-ULIB = string.o math.o stdlib.o stdio.o scanf.o ctype.o setjmp.o
+ULIB = string.o math.o stdlib.o stdio.o scanf.o ctype.o setjmp.o time.o
 
 _ULIB = $(addprefix $(OUTDIR)/, $(ULIB))
 
