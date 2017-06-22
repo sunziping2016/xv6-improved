@@ -8,6 +8,12 @@
     int $T_SYSCALL; \
     ret
 
+
+#define T_SYSCALL 64
+
+
+
+
 SYSCALL(fork)
 SYSCALL(exit)
 SYSCALL(wait)
@@ -62,4 +68,4 @@ SYSCALL(seteditstatus)
 SYSCALL(mount)
 SYSCALL(unmount)
 SYSCALL(gettime)
-
+SYSCALL(sockcall)

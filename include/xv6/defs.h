@@ -6,7 +6,6 @@ struct pipe;
 struct proc;
 struct rtcdate;
 struct spinlock;
-struct sleeplock;
 struct stat;
 struct superblock;
 struct proclist;
@@ -111,7 +110,9 @@ void            mountinit(void);
 
 // mp.c
 extern int      ismp;
+int             mpbcpu(void);
 void            mpinit(void);
+void            mpstartthem(void);
 
 // picirq.c
 void            picenable(int);
@@ -125,6 +126,7 @@ int             pipewrite(struct pipe*, char*, int);
 
 //PAGEBREAK: 16
 // proc.c
+struct proc*    copyproc(struct proc*);
 void            exit(void);
 int             fork(void);
 int             growproc(int);
@@ -151,12 +153,6 @@ void            release(struct spinlock*);
 void            pushcli(void);
 void            popcli(void);
 
-// sleeplock.c
-void            acquiresleep(struct sleeplock*);
-void            releasesleep(struct sleeplock*);
-int             holdingsleep(struct sleeplock*);
-void            initsleeplock(struct sleeplock*, char*);
-
 // string.c
 int             memcmp(const void*, const void*, uint);
 void*           memmove(void*, const void*, uint);
@@ -173,6 +169,11 @@ int             argstr(int, char**);
 int             fetchint(uint, int*);
 int             fetchstr(uint, char**);
 void            syscall(void);
+
+//[ Xv6 Networking ] Expose file descriptor functions
+// sysfile.c
+int             fdalloc(struct file*);
+struct inode*   inode_find_create(char*, short, short, short);
 
 // timer.c
 void            timerinit(void);
@@ -192,6 +193,7 @@ void            uartputc(int);
 // vm.c
 void            seginit(void);
 void            kvmalloc(void);
+void            vmenable(void);
 pde_t*          setupkvm(void);
 char*           uva2ka(pde_t*, char*);
 int             allocuvm(pde_t*, uint, uint);
@@ -205,6 +207,14 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
+//[ Xv6 Networking ] Extra kernel functions
+// kernel-extra/core/kernel-init.c
+extern void     kernel_extra_init();
+
+// kernel-extra/net/sockcall.c
+extern int      sockread(struct file*, char*, int);
+extern int      sockwrite(struct file*, char*, int);
+extern int      sockclose(struct file*);
 void            freestackvm(pde_t *pgdir, uint stack);
 pde_t*          copystackuvm(pde_t *pgdir, uint sz, uint stack);
 

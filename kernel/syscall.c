@@ -104,6 +104,7 @@ extern int sys_nosound(void);
 extern int sys_geteditstatus(void);
 extern int sys_seteditstatus(void);
 extern int sys_gettime(void);
+extern int sys_sockcall(void);
 
 extern int thread_create(void);
 extern int thread_exit(void);
@@ -163,6 +164,7 @@ static int (*syscalls[])(void) = {
     [SYS_playsound] sys_playsound,
     [SYS_nosound] sys_nosound,
     [SYS_gettime] sys_gettime,
+    [SYS_sockcall] sys_sockcall,
     [SYS_thread_create] thread_create,
     [SYS_thread_exit]   thread_exit,
     [SYS_thread_wait]   thread_wait,

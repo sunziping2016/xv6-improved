@@ -1,10 +1,17 @@
+//[ Xv6 Networking ] Socket declaration
+struct socket;
+
 struct file {
-  enum { FD_NONE, FD_PIPE, FD_INODE } type;
+  //[ Xv6 Networking ]
+  //* Add socket file descriptor type
+  enum { FD_NONE, FD_PIPE, FD_INODE, FD_SOCK } type;
   int ref; // reference count
   char readable;
   char writable;
   struct pipe *pipe;
   struct inode *ip;
+  //[ Xv6 Networking ] Add socket reference
+  struct socket* sock;
   uint off;
 };
 
@@ -14,8 +21,7 @@ struct inode {
   uint dev;           // Device number
   uint inum;          // Inode number
   int ref;            // Reference count
-  struct sleeplock lock;
-  int flags;          // I_VALID
+  int flags;          // I_BUSY, I_VALID
 
   short type;         // copy of disk inode
   short major;
@@ -24,6 +30,7 @@ struct inode {
   uint size;
   uint addrs[NDIRECT+1];
 };
+#define I_BUSY 0x1
 #define I_VALID 0x2
 
 // table mapping major device number to

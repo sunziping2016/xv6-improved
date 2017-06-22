@@ -1,0 +1,21 @@
+#pragma once
+#define	ENOENT 2
+#define	EBADF 9
+#define ENOMEM 12
+#define	EFAULT 14
+#define	EINVAL 22
+#define	ENFILE 23
+#define	EMFILE 24
+#define EOPNOTSUPP 95
+#define ENOBUFS 105
+#define EAFNOSUPPORT 106
+#define EPROTOTYPE 107
+#define ENOTSOCK 108
+#define EADDRINUSE 112
+#define EHOSTUNREACH 118
+#define EALREADY 120
+#define EDESTADDRREQ 121
+#define EMSGSIZE 122
+#define EPROTONOSUPPORT 123
+#define EADDRNOTAVAIL 125
+#define ENOTCONN 128

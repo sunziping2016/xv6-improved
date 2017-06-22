@@ -68,3 +68,10 @@
 #define SYS_playsound 77
 #define SYS_nosound 78
 
+#define SYS_getcrtc 79
+#define SYS_setcrtc 80
+#define SYS_getcurpos 81
+#define SYS_setcurpos 82
+#define SYS_gettime 83
+#define SYS_sockcall 84
+

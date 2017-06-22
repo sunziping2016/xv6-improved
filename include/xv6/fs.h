@@ -8,11 +8,10 @@
 
 extern  int  used_capcity, useable_capcity;
 // Disk layout:
-// [ boot block | super block | log | inode blocks |
-//                                          free bit map | data blocks]
+// [ boot block | super block | log | inode blocks | free bit map | data blocks ]
 //
-// mkfs computes the super block and builds an initial file system. The
-// super block describes the disk layout:
+// mkfs computes the super block and builds an initial file system. The super describes
+// the disk layout:
 struct superblock {
   uint size;         // Size of file system image (blocks)
   uint nblocks;      // Number of data blocks
@@ -24,8 +23,11 @@ struct superblock {
   uint initusedblock;    // Block number of used  block
 };
 
-#define NDIRECT 12
-#define NINDIRECT (BSIZE / sizeof(uint))
+#define ADDRCOUNT 13
+#define INDIRECTCOUNT 9
+#define NDIRECT (ADDRCOUNT - INDIRECTCOUNT)
+#define PINDIRECT (BSIZE / sizeof(uint))
+#define NINDIRECT (PINDIRECT * INDIRECTCOUNT)
 #define MAXFILE (NDIRECT + NINDIRECT)
 
 // On-disk inode structure
@@ -35,7 +37,7 @@ struct dinode {
   short minor;          // Minor device number (T_DEV only)
   short nlink;          // Number of links to inode in file system
   uint size;            // Size of file (bytes)
-  uint addrs[NDIRECT+1];   // Data block addresses
+  uint addrs[NDIRECT+INDIRECTCOUNT];   // Data block addresses
 };
 
 // Inodes per block.

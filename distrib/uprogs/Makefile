@@ -5,6 +5,8 @@ OUTDIR = $(BUILDDIR)/distrib/uprogs
 
 UPROGS = cat echo forktest grep init kill ln ls \
 		mkdir rm sh stressfs usertests wc zombie \
+		pwd reader stdtests jerry timetest \
+                udp-test unix-test
 		mount pwd reader stdtests jerry timetest vi bi \
 		semtest rwtest demo cp cmp testdev
 
