@@ -17,7 +17,7 @@ unsigned char devname[][20] = {
 #define devnamenum 9
 #define devtest_interval 20000000
 char hdatext[] = {"kai hei ma? wo ya se zei 6.   "};
-char hdainfotext[] = {"180"};
+char hdainfotext[] = {"800"};
 char soundtext[]={"1155665 4433221 5544332 5544332 1155665 4433221"};
 void
 testdev(int devnum, int fd)
