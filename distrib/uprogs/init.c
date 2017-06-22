@@ -20,6 +20,8 @@
 #define MDEVRANDOM 5
 #define NDEVURANDOM 1
 #define MDEVURANDOM 6
+#define NDEVPERFCTR 1
+#define MDEVPERFCTR 7
 
 char *argv[] = { "sh", 0 };
 
@@ -35,6 +37,7 @@ main(void)
         mknod("console", NCONSOLE, MCONSOLE);
         open("console", O_RDWR);
     }
+    mknod("perfctr", NDEVPERFCTR, MDEVPERFCTR);
     mknod("sound", NDEVSOUND, MDEVSOUND);
     mknod("null",NDEVNULL,MDEVNULL);
     mknod("zero",NDEVZERO,MDEVZERO);

@@ -36,6 +36,7 @@ struct devsw {
 extern struct devsw devsw[][MDEV];
 
 
+
 #define NDEVHDA  2
 #define MDEVHDA  1
 #define NDEVHDAINFO 2
@@ -52,6 +53,7 @@ extern struct devsw devsw[][MDEV];
 #define MDEVRANDOM 5
 #define NDEVURANDOM 1
 #define MDEVURANDOM 6
-
+#define NDEVPERFCTR 1
+#define MDEVPERFCTR 7
 //PAGEBREAK!
 // Blank page.

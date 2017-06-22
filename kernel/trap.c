@@ -56,7 +56,7 @@ trap(struct trapframe *tf)
             release(&tickslock);
         }
         else if (cpunum() == 1)
-           new_ticks++;
+        new_ticks++;
         lapiceoi();
         break;
     case T_IRQ0 + IRQ_IDE:

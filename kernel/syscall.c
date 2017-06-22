@@ -126,12 +126,13 @@ static int (*syscalls[])(void) = {
     [SYS_setcrtc] sys_setcrtc,
     [SYS_getcurpos] sys_getcurpos,
     [SYS_setcurpos] sys_setcurpos,
+    [SYS_playsound] sys_playsound,
+    [SYS_nosound] sys_nosound,
 };
 
 void syscall(void)
 {
     int num;
-
     num = proc->tf->eax;
     if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {
         proc->tf->eax = syscalls[num]();
