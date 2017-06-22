@@ -11,7 +11,7 @@
 #include "xv6/memlayout.h"
 #include "xv6/mmu.h"
 #include "xv6/proc.h"
-#include "xv6/x86.h"1
+#include "xv6/x86.h"
 
 extern struct {
     struct spinlock lock;
@@ -27,10 +27,10 @@ static struct
 
 
 int
-perfctrread(struct inode *ip, char *dst, int n)
+perfctrread(struct inode *ip, char *dst, uint off, uint n)
 {
     uint target;
-    
+
     iunlock(ip);
     target = n;
     acquire(&perf.lock);
@@ -45,36 +45,51 @@ perfctrread(struct inode *ip, char *dst, int n)
         uint counter = 0;
         struct inode *ipointer;
         for (ipointer = &icache.inode[0]; ipointer < &icache.inode[NINODE]; ipointer++)
-            if(ipointer->ref > 0)
-                counter++;
+        {
+          int j = ipointer->ref;
+          while( j > 0)
+          {
+          counter++;
+          --j;
+          }
+        }
         int percentage = 100 * counter / NINODE;
-
-        *dst++ = (int) percentage / 10 + '0';       //tens
-        *dst++ = (int) percentage % 10 + '0';       //ones
-        *dst++ = '%';
-        *dst++ = '\n';
-        n -= 4;
-        perf.r += 4;
+        i = 0;
+        *dst++ = 'n';i++;
+        *dst++ = 'o';i++;
+        *dst++ = 'd';i++;
+        *dst++ = 'e';i++;
+        *dst++ = ' ';i++;
+        *dst++ = 'u';i++;
+        *dst++ = 's';i++;
+        *dst++ = 'e';i++;
+        *dst++ = ' ';i++;
+        *dst++ = (int) percentage / 10 + '0';i++;       //tens
+        *dst++ = (int) percentage % 10 + '0';i++;       //ones
+        *dst++ = '%';i++;
+        *dst++ = '\n';i++;
+        n -= i;
+        perf.r += i;
     }
-    else 
+    else
         perf.r = 0;
     release(&perf.lock);
     ilock(ip);
     return target - n;
 }
-int 
-perfctrwrite(struct inode *ip, char *buf, int n)
+int
+perfctrwrite(struct inode *ip, char *cbuf, uint off, uint n)
 {
     iunlock(ip);
     ilock(ip);
     return n;
 }
-void 
+void
 perfctrinit(void)
 {
     initlock(&perf.lock, "prefctr");
 
-    devsw[PERFCTR].write = perfctrwrite;
-    devsw[PERFCTR].read = perfctrread;
+    devsw[NDEVPERFCTR][MDEVPERFCTR].write = perfctrwrite;
+    devsw[NDEVPERFCTR][MDEVPERFCTR].read = perfctrread;
     perf.locking = 1;
 }

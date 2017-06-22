@@ -85,17 +85,7 @@ runcmd(struct cmd *cmd)
         struct stat st;
         int fd;
         if((fd=open(rcmd->file,0)) > 0){
-        //printf(2, "open  %d\n",fd);
-        if(fstat(fd, &st) >=0)
-        {
-            if(st.type == T_DEV && (rcmd->mode & O_CREATE))
-            {
-                rcmd->mode -= O_CREATE;
-            }
-        }
-      close(fd);
-    }
-        if(fstat(fd, &st) >=0){
+          if(fstat(fd, &st) >=0){
             if(st.type == T_DEV && (rcmd->mode & O_CREATE))
               {
                 rcmd->mode -= O_CREATE;
@@ -109,7 +99,7 @@ runcmd(struct cmd *cmd)
         }
         runcmd(rcmd->cmd);
         break;
-        
+
     case LIST:
         lcmd = (struct listcmd*)cmd;
         if (fork1() == 0)

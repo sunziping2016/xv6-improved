@@ -74,15 +74,6 @@ soundwrite(struct inode *ip, char *buf, uint off, int n)
     ilock(ip);
     return n;
 }
-void 
-soundinit(void)
-{
-    initlock(&sound.lock, "sound");
-
-    devsw[SOUND].write = soundwrite;
-    devsw[SOUND].read = soundread;
-    sound.locking = 1;
-}
 void
 soundinit(void)
 {

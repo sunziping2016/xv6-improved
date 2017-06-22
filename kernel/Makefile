@@ -13,6 +13,7 @@ OBJS = \
 	sound.o\
 	devsound.o\
 	devhdainfo.o\
+	devperfctr.o\
 	entry.o\
 	exec.o\
 	file.o\
@@ -42,9 +43,6 @@ OBJS = \
 	trapasm.o\
 	vectors.o\
 	vm.o\
-	sound.o\
-	devsound.o\
-	devperfctr.o\
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 
