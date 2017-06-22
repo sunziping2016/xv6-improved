@@ -22,7 +22,8 @@ void            consoleinit(void);
 void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 void            panic(char*) __attribute__((noreturn));
-
+//devfull.c
+void            fullinit(void);
 //devprefctr.c
 void            perfctrinit(void);
 //devzero.c

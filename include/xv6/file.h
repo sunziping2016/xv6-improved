@@ -55,5 +55,7 @@ extern struct devsw devsw[][MDEV];
 #define MDEVURANDOM 6
 #define NDEVPERFCTR 1
 #define MDEVPERFCTR 7
+#define NDEVFULL 1
+#define MDEVFULL 8
 //PAGEBREAK!
 // Blank page.

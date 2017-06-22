@@ -29,6 +29,7 @@ main(void)
     perfctrinit();   // performance counter device
     nullinit();      // /dev/null
     zeroinit();      // /dev/zero
+    fullinit();      // /dev/full
     soundinit();     // /dev/sound
     randominit();    // /dev/random /dev/urandom
     hdainit();       // /dev/hda

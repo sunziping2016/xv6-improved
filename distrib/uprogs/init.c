@@ -22,6 +22,10 @@
 #define MDEVURANDOM 6
 #define NDEVPERFCTR 1
 #define MDEVPERFCTR 7
+#define NDEVFULL 1
+#define MDEVFULL 8
+
+
 
 char *argv[] = { "sh", 0 };
 
@@ -43,6 +47,7 @@ main(void)
     mknod("zero",NDEVZERO,MDEVZERO);
     mknod("random",NDEVRANDOM,MDEVRANDOM);
     mknod("urandom",NDEVURANDOM,MDEVURANDOM);
+    mknod("full",NDEVFULL,MDEVFULL);
     dup(0);  // stdout
     dup(0);  // stderr
     chdir("..");

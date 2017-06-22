@@ -9,6 +9,7 @@ OBJS = \
 	devzero.o\
 	devrandom.o\
 	devnull.o\
+	devfull.o\
 	devhda.o\
 	sound.o\
 	devsound.o\
