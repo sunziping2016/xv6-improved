@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdint.h>
 
 int main(int argc, char *argv[])
 {
@@ -10,8 +9,5 @@ int main(int argc, char *argv[])
 
     scanf("%c %c %f %d %s", &b, &c, &fl, &t, a);
     myprintf("%c  %c  %f  %d  %s\n", b, c, fl, t, a);
-
     return 0;
 }
-
-

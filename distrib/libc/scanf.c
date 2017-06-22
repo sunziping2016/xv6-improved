@@ -888,4 +888,15 @@ va_end(ap);
 return (ret);
 }
 
+int fscanf(FILE *fp, char *fmt, ...)
+{
+    int ret;
+    va_list ap;
+    va_start(ap, fmt);
+    ret = __svfscanf(fp, fmt, ap);
+    va_end(ap);
+    return (ret);
+}
+
+
 #endif
