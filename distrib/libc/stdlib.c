@@ -54,6 +54,12 @@ static Header *morecore(unsigned int nu)
     return freep;
 }
 
+void malloc_test(int id)
+{
+    //myprintf("malloc_test: %d", freep);
+    printf(2, "test %d: %d\n", id, freep);
+}
+
 void *malloc(unsigned int nbytes)
 {
     Header *p, *prevp;

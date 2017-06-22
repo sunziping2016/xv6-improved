@@ -38,6 +38,7 @@ int             filewrite(struct file*, char*, int n);
 void            readsb(int dev, struct superblock *sb);
 int             dirlink(struct inode*, char*, uint);
 struct inode*   dirlookup(struct inode*, char*, uint*);
+struct inode*   getmntin(struct inode*);
 struct inode*   ialloc(uint, short);
 struct inode*   idup(struct inode*);
 void            iinit(int dev);
@@ -86,6 +87,9 @@ void            initlog(int dev);
 void            log_write(struct buf*);
 void            begin_op();
 void            end_op();
+
+// mount.c
+void            mountinit(void);
 
 // mp.c
 extern int      ismp;

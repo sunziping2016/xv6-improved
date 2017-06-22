@@ -5,7 +5,7 @@ OUTDIR = $(BUILDDIR)/distrib/uprogs
 
 UPROGS = cat echo forktest grep init kill ln ls \
 		mkdir rm sh stressfs usertests wc zombie \
-		pwd reader stdtests jerry timetest
+		mount pwd reader stdtests jerry timetest vi bi
 
 ULIB = $(OUTDIR)/../ulib/ulib.a
 LIBC = $(OUTDIR)/../libc/libc.a
@@ -23,7 +23,7 @@ $(LIBC): FORCE
 $(OUTDIR)/%.o: %.c | $(OUTDIR)
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-$(OUTDIR)/%: $(OUTDIR)/%.o $(START) $(ULIB) $(LIBC) | $(OUTDIR)
+$(OUTDIR)/%: $(OUTDIR)/%.o $(START) $(LIBC) $(ULIB)  | $(OUTDIR)
 	$(LD) $(LDFLAGS) -s -N -e _start -Ttext 0 -o $@ $^
 
 install: $(_UPROGS)
