@@ -30,4 +30,8 @@
 #define SYS_sigqueue 29
 #define SYS_siginterrupt 30
 #define SYS_sigset 31
+<<<<<<< HEAD
 #define SYS_sigrelse 32
+=======
+#define SYS_sigrelse 32
+>>>>>>> d309231487fed12c6fae079d2b20295733d43142

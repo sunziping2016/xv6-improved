@@ -37,7 +37,10 @@ struct sched_param
         }           __ss;
     }           __ss_un;
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> d309231487fed12c6fae079d2b20295733d43142
 struct pthread_attr_t
 {
     int contentionscope;
@@ -156,6 +159,7 @@ typedef struct mcontext_t
     struct ucontext_t *uc_link;     //Pointer to the context that is resumed when this context returns.
     sigset_t    uc_sigmask;  //The set of signals that are blocked when this context is active.
     struct stack_t     uc_stack;   //The stack used by this context.
+<<<<<<< HEAD
 }ucontext_t;
 
 struct sighand_struct {
@@ -185,6 +189,33 @@ int    siginterrupt(int, int);
 int    sigismember(const sigset_t *, int);
 int    sigisemptyset(sigset_t *);
 void   sigdelsetmask(sigset_t *, unsigned long );
+=======
+    //struct mcontext_t  uc_mcontext; //A machine-specific representation of the saved context.
+}ucontext_t;
+
+struct sigpending {
+    sigset_t signal;
+};
+void setsignal(void);
+void (*bsd_signal(int, void (*)(int)))(int);
+int    sigkill(int, int);
+int    killpg(int, int);
+int    pthread_kill(pthread_t, int);
+int    pthread_sigmask(int, const sigset_t *, sigset_t *);
+int    raise(int);
+//
+int    sigaddset(sigset_t *, int);//
+int    sigaltstack(const struct stack_t *restrict, struct stack_t *restrict);
+int    sigdelset(sigset_t *, int);//
+int    sigemptyset(sigset_t *);//
+int    sigfillset(sigset_t *);//
+int    sighold(int);
+int    sigignore(int);
+int    siginterrupt(int, int);//
+int    sigismember(const sigset_t *, int);//
+int    sigisemptyset(sigset_t *);//
+void   sigdelsetmask(sigset_t *, unsigned long );//
+>>>>>>> d309231487fed12c6fae079d2b20295733d43142
 void (*signal(int, void (*)(int)))(int);
 int    sigpause(int);
 int    sigpending(sigset_t *);
@@ -198,5 +229,9 @@ int    sigtimedwait(const sigset_t *restrict, struct siginfo_t *restrict,
 int    sigwait(const sigset_t *restrict, int *restrict);
 int    sigwaitinfo(const sigset_t *restrict, struct siginfo_t *restrict);
 void sigdefhandler(int);
+<<<<<<< HEAD
 
+=======
+//void *sig_handler(struct proc *t, int sig);
+>>>>>>> d309231487fed12c6fae079d2b20295733d43142
 #endif //XV6_IMPROVED_SIGNAL_H
