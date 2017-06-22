@@ -10,7 +10,7 @@ OBJDUMP = objdump
 RANLIB = ranlib
 QEMU = qemu-system-i386
 
-CFLAGS += -nostdinc -fno-builtin -fno-stack-protector -Wall -Wextra -m32 -I$(INCLDIR)
+CFLAGS += -nostdinc -fno-builtin -fno-stack-protector -std=gnu99 -Wall -Wextra -m32 -I$(INCLDIR)
 
 # Release or Debug?
 #CFLAGS += -O2
