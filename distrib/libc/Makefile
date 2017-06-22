@@ -1,17 +1,17 @@
 TOP_SRCDIR = ../..
 include $(TOP_SRCDIR)/Makefile.common
 
-OUTDIR = $(BUILDDIR)/distrib/ulib
+OUTDIR = $(BUILDDIR)/distrib/libc
 
-ULIB = ulib.o usys.o printf.o
+ULIB = string.o math.o stdlib.o stdio.o scanf.o ctype.o setjmp.o time.o
 
 _ULIB = $(addprefix $(OUTDIR)/, $(ULIB))
 
-all: $(OUTDIR)/ulib.a
+all: $(OUTDIR)/libc.a
 
 install:
 
-$(OUTDIR)/ulib.a: $(_ULIB) | $(OUTDIR)
+$(OUTDIR)/libc.a: $(_ULIB) | $(OUTDIR)
 	$(AR) vr $@ $^
 	$(RANLIB) $@
 

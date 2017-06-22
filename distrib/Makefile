@@ -1,7 +1,7 @@
 TOP_SRCDIR = ..
 include $(TOP_SRCDIR)/Makefile.common
 
-SUBDIRS = ulib uprogs
+SUBDIRS = libc ulib uprogs
 
 .PHONY: all install clean
 

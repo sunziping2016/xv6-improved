@@ -17,6 +17,7 @@ OBJS = \
 	lapic.o\
 	log.o\
 	main.o\
+	mount.o\
 	mp.o\
 	picirq.o\
 	pipe.o\
@@ -26,6 +27,7 @@ OBJS = \
 	string.o\
 	swtch.o\
 	syscall.o\
+	tui.o\
 	sysfile.o\
 	sysproc.o\
         syssync.o\

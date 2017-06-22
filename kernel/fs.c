@@ -18,6 +18,7 @@
 #include "xv6/spinlock.h"
 #include "xv6/sleeplock.h"
 #include "xv6/fs.h"
+#include "xv6/mount.h"
 #include "xv6/buf.h"
 #include "xv6/file.h"
 
@@ -56,7 +57,7 @@ bzero(int dev, int bno)
 static uint
 balloc(uint dev)
 {
-    int b, bi, m;
+    uint b, bi, m;
     struct buf *bp;
 
     bp = 0;
@@ -185,7 +186,7 @@ static struct inode* iget(uint dev, uint inum);
 struct inode*
 ialloc(uint dev, short type)
 {
-    int inum;
+    uint inum;
     struct buf *bp;
     struct dinode *dip;
 
@@ -389,7 +390,7 @@ bmap(struct inode *ip, uint bn)
 static void
 itrunc(struct inode *ip)
 {
-    int i, j;
+    uint i, j;
     struct buf *bp;
     uint *a;
 
@@ -427,10 +428,49 @@ stati(struct inode *ip, struct stat *st)
     st->size = ip->size;
 }
 
+// Get the really device number.
+// If ip is a mounted directory, return device number of mounted device.
+// Otherwise return original one.
+struct inode*
+getmntin(struct inode *ip)
+{
+    if (ip->type != T_DIR)
+        return ip;
+    struct mountsw *mp;
+    for (mp = mountsw; mp < mntswend; mp++)
+        if (mp->dp == ip)
+            return iget(mp->dev, ROOTINO);
+    return ip;
+}
+
 //PAGEBREAK!
 // Read data from inode.
 int
 readi(struct inode *ip, char *dst, uint off, uint n)
+{
+    struct mountsw *mp;
+    ip = getmntin(ip);
+    for (mp = mountsw; mp < mntswend; mp++)
+        if (mp->dev == ip->dev)
+            return getfs(mp->fsid)->read(ip, dst, off, n);
+    return -1;
+}
+
+// PAGEBREAK!
+// Write data to inode.
+int
+writei(struct inode *ip, char *src, uint off, uint n)
+{
+    struct mountsw *mp;
+    ip = getmntin(ip);
+    for (mp = mountsw; mp < mntswend; mp++)
+        if (mp->dev == ip->dev)
+            return getfs(mp->fsid)->write(ip, src, off, n);
+    return -1;
+}
+
+int
+deffsread(struct inode *ip, char *dst, uint off, uint n)
 {
     uint tot, m;
     struct buf *bp;
@@ -465,7 +505,7 @@ readi(struct inode *ip, char *dst, uint off, uint n)
 // PAGEBREAK!
 // Write data to inode.
 int
-writei(struct inode *ip, char *src, uint off, uint n)
+deffswrite(struct inode *ip, char *src, uint off, uint n)
 {
     uint tot, m;
     struct buf *bp;
@@ -516,6 +556,8 @@ dirlookup(struct inode *dp, char *name, uint *poff)
     if (dp->type != T_DIR)
         panic("dirlookup not DIR");
 
+    dp = getmntin(dp);
+
     for (off = 0; off < dp->size; off += sizeof(de)) {
         if (readi(dp, (char*)&de, off, sizeof(de)) != sizeof(de))
             panic("dirlink read");
@@ -526,7 +568,7 @@ dirlookup(struct inode *dp, char *name, uint *poff)
             if (poff)
                 *poff = off;
             inum = de.inum;
-            return iget(dp->dev, inum);
+            return iget(getmntin(dp)->dev, inum);
         }
     }
 
@@ -537,7 +579,7 @@ dirlookup(struct inode *dp, char *name, uint *poff)
 int
 dirlink(struct inode *dp, char *name, uint inum)
 {
-    int off;
+    uint off;
     struct dirent de;
     struct inode *ip;
 
@@ -546,6 +588,8 @@ dirlink(struct inode *dp, char *name, uint inum)
         iput(ip);
         return -1;
     }
+
+    dp = getmntin(dp);
 
     // Look for an empty dirent.
     for (off = 0; off < dp->size; off += sizeof(de)) {

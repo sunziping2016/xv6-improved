@@ -19,6 +19,8 @@ static void consputc(int);
 
 static int panicked = 0;
 
+int editStatus = 0;
+
 static struct {
     struct spinlock lock;
     int locking;
@@ -124,6 +126,8 @@ panic(char *s)
 
 //PAGEBREAK: 50
 #define BACKSPACE 0x100
+#define KEY_LF 0xE4
+#define KEY_RT 0xE5
 #define CRTPORT 0x3d4
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
 
@@ -131,7 +135,7 @@ static void
 cgaputc(int c)
 {
     int pos;
-
+    int flag = 0;
     // Cursor position: col + 80*row.
     outb(CRTPORT, 14);
     pos = inb(CRTPORT + 1) << 8;
@@ -141,8 +145,22 @@ cgaputc(int c)
     if (c == '\n')
         pos += 80 - pos % 80;
     else if (c == BACKSPACE) {
-        if (pos > 0) --pos;
-    } else
+        if (pos > 0) {
+            --pos;
+            flag = 1;
+        }
+    }
+    else if (c == KEY_LF){
+        if (pos > 0){
+            --pos;
+        }
+    }
+    else if (c == KEY_RT){
+        if (pos <= 25 * 80) {
+            ++pos;
+        }
+    }
+    else
         crt[pos++] = (c & 0xff) | 0x0700; // black on white
 
     if (pos < 0 || pos > 25 * 80)
@@ -153,12 +171,14 @@ cgaputc(int c)
         pos -= 80;
         memset(crt + pos, 0, sizeof(crt[0]) * (24 * 80 - pos));
     }
-
     outb(CRTPORT, 14);
     outb(CRTPORT + 1, pos >> 8);
     outb(CRTPORT, 15);
     outb(CRTPORT + 1, pos);
-    crt[pos] = ' ' | 0x0700;
+
+    if(flag == 1)
+        crt[pos] = ' ' | 0x0700;
+
 }
 
 void
@@ -189,13 +209,76 @@ struct {
 
 #define C(x)  ((x)-'@')  // Control-x
 
+#define INSERT -2;
+
 void
 consoleintr(int (*getc)(void))
 {
     int c, doprocdump = 0;
 
+
     acquire(&cons.lock);
     while ((c = getc()) >= 0) {
+        if(editStatus != 0 && c != 0)
+        {
+
+            if(editStatus == -1)
+            {
+                switch(c)
+                {
+                    case C('I'):
+                        editStatus = -2;
+                        break;
+                    case 'q':
+                        editStatus = -3;
+                        break;
+                    case 0xe2:
+                        editStatus = -4;
+                        break;
+                    case 0xe3:
+                        editStatus = -5;
+                        break;
+                    case 0xe4:
+                        editStatus = -6;
+                        break;
+                    case 0xe5:
+                        editStatus = -7;
+                        break;
+                }
+            }
+            else if(editStatus == -2)
+            {
+                switch(c)
+                {
+                    case C('I'):
+                        editStatus = -1;
+                        break;
+                    case C('Q'):
+                        editStatus = -3;
+                    case 0xe2:
+                        editStatus = -4;
+                        break;
+                    case 0xe3:
+                        editStatus = -5;
+                        break;
+                    case 0xe4:
+                        editStatus = -6;
+                        break;
+                    case 0xe5:
+                        editStatus = -7;
+                        break;
+                    default:
+                        editStatus = c + 256;
+
+                }
+
+
+            }
+
+
+            continue;
+        }
+
         switch (c) {
         case C('P'):  // Process listing.
             // procdump() locks cons.lock indirectly; invoke later

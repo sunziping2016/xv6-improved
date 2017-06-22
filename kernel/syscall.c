@@ -84,15 +84,24 @@ extern int sys_kill(void);
 extern int sys_link(void);
 extern int sys_mkdir(void);
 extern int sys_mknod(void);
+extern int sys_mount(void);
 extern int sys_open(void);
 extern int sys_pipe(void);
 extern int sys_read(void);
 extern int sys_sbrk(void);
 extern int sys_sleep(void);
 extern int sys_unlink(void);
+extern int sys_unmount(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_getcrtc(void);
+extern int sys_setcrtc(void);
+extern int sys_getcurpos(void);
+extern int sys_setcurpos(void);
+extern int sys_geteditstatus(void);
+extern int sys_seteditstatus(void);
+extern int sys_gettime(void);
 
 extern int thread_create(void);
 extern int thread_exit(void);
@@ -141,23 +150,28 @@ static int (*syscalls[])(void) = {
     [SYS_link]    sys_link,
     [SYS_mkdir]   sys_mkdir,
     [SYS_close]   sys_close,
-
+    [SYS_getcrtc] sys_getcrtc,
+    [SYS_setcrtc] sys_setcrtc,
+    [SYS_getcurpos] sys_getcurpos,
+    [SYS_setcurpos] sys_setcurpos,
+    [SYS_geteditstatus] sys_geteditstatus,
+    [SYS_seteditstatus] sys_seteditstatus,
+    [SYS_mount]   sys_mount,
+    [SYS_unmount]   sys_unmount,
+    [SYS_gettime] sys_gettime,
     [SYS_thread_create] thread_create,
     [SYS_thread_exit]   thread_exit,
     [SYS_thread_wait]   thread_wait,
-
     [SYS_lock_create]  sys_lock_create,
     [SYS_lock_acquire] sys_lock_acquire,
     [SYS_lock_release] sys_lock_release,
     [SYS_lock_holding] sys_lock_holding,
     [SYS_lock_free]    sys_lock_free,
-
     [SYS_semaphore_create]     sys_semaphore_create,
     [SYS_semaphore_acquire]    sys_semaphore_acquire,
     [SYS_semaphore_release]    sys_semaphore_release,
     [SYS_semaphore_getcounter] sys_semaphore_getcounter,
     [SYS_semaphore_free]       sys_semaphore_free,
-
     [SYS_rwlock_create]  	sys_rwlock_create,
     [SYS_rwlock_acquire_read] 	sys_rwlock_acquire_read,
     [SYS_rwlock_release_read] 	sys_rwlock_release_read,

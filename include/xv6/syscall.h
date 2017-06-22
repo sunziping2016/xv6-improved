@@ -45,3 +45,13 @@
 #define SYS_rwlock_holding_read 	56
 #define SYS_rwlock_holding_write 	57
 #define SYS_rwlock_free    		58
+
+#define SYS_getcrtc 59
+#define SYS_setcrtc 60
+#define SYS_getcurpos 61
+#define SYS_setcurpos 62
+#define SYS_geteditstatus 63
+#define SYS_seteditstatus 64
+#define SYS_mount  65
+#define SYS_unmount 66
+#define SYS_gettime 67
