@@ -44,6 +44,16 @@ void semaphore_release(usersem);
 int semaphore_getcounter(usersem);
 void semaphore_free(usersem);
 
+//// read-write lock
+userrwlock rwlock_create(void);
+void rwlock_acquire_read(userrwlock);
+void rwlock_acquire_write(userrwlock);
+void rwlock_release_read(userrwlock);
+void rwlock_release_write(userrwlock);
+int rwlock_holding_read(userrwlock);
+int rwlock_holding_write(userrwlock);
+void rwlock_free(userrwlock);
+
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);

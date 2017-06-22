@@ -15,4 +15,5 @@
 #define NLOCK        64  // maximum number of lock
 #define NSEM         64  // maximum number of semaphore
 #define NPNODE       NPROC  // maximum number of process node
+#define NRW	     64  // maximum number of rwlock
 

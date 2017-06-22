@@ -8,6 +8,7 @@
 #include "xv6/spinlock.h"
 #include "xv6/sleeplock.h"
 #include "xv6/semaphore.h"
+#include "xv6/rwlock.h"
 
 struct {
   struct spinlock lock; // Protect this lock table.
@@ -24,6 +25,14 @@ struct {
     int isused;         // Is the semaphore used now?
   } sem[NSEM];
 } semtable;
+
+struct {
+  struct spinlock lock; // Protect this semaphore table.
+  struct {
+    struct rwlock rw;
+    int isused;         // Is the semaphore used now?
+  } rw[NRW];
+} rwtable;
 
 userlock
 sys_lock_create(void)
@@ -177,4 +186,113 @@ sys_semaphore_free(void)
     semtable.sem[usem].isused = 0;
 
     release(&semtable.lock);
+}
+
+userrwlock 
+sys_rwlock_create(void)
+{
+    acquire(&rwtable.lock);
+
+    userrwlock ulk = -1;
+    for (int i = 0; i < NRW; i++)
+        if (!rwtable.rw[i].isused) {
+            ulk = i;
+            initrwlock(&rwtable.rw[i].rw, "user");
+            rwtable.rw[i].isused = 1;
+            break;
+        }
+
+    release(&rwtable.lock);
+
+    return ulk;
+}
+
+void sys_rwlock_acquire_read(void)
+{
+    userrwlock ulk;
+    if (argint(0, &ulk) < 0)
+        return;
+
+    if (!rwtable.rw[ulk].isused)
+        panic("visit an unused lock");
+
+    acquireread(&rwtable.rw[ulk].rw);
+}
+
+void sys_rwlock_acquire_write(void)
+{
+    userrwlock ulk;
+    if (argint(0, &ulk) < 0)
+        return;
+
+    if (!rwtable.rw[ulk].isused)
+        panic("visit an unused lock");
+
+    acquirewrite(&rwtable.rw[ulk].rw);
+}
+
+void sys_rwlock_release_read(void)
+{
+    userrwlock ulk;
+    if (argint(0, &ulk) < 0)
+        return;
+
+    if (!rwtable.rw[ulk].isused)
+        panic("visit an unused lock");
+
+    releaseread(&rwtable.rw[ulk].rw);
+}
+
+void sys_rwlock_release_write(void)
+{
+    userrwlock ulk;
+    if (argint(0, &ulk) < 0)
+        return;
+
+    if (!rwtable.rw[ulk].isused)
+        panic("visit an unused lock");
+
+    releasewrite(&rwtable.rw[ulk].rw);
+}
+
+
+int sys_rwlock_holding_read(void)
+{
+    userrwlock ulk;
+    if (argint(0, &ulk) < 0)
+        return -1;
+
+    if (!rwtable.rw[ulk].isused)
+        panic("visit an unused lock");
+
+    return holding_read(&rwtable.rw[ulk].rw);
+}
+
+int sys_rwlock_holding_write(void)
+{
+    userrwlock ulk;
+    if (argint(0, &ulk) < 0)
+        return -1;
+
+    if (!rwtable.rw[ulk].isused)
+        panic("visit an unused lock");
+
+    return holding_write(&rwtable.rw[ulk].rw);
+}
+
+
+void sys_rwlock_free(void)
+{
+    userrwlock ulk;
+    if (argint(0, &ulk) < 0)
+        return;
+
+    if (!rwtable.rw[ulk].isused)
+        panic("visit an unused lock");
+
+    acquire(&rwtable.lock);
+
+    rwtable.rw[ulk].isused = 0;
+
+    release(&rwtable.lock);
 }

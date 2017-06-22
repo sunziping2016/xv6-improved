@@ -36,6 +36,7 @@ OBJS = \
 	vectors.o\
 	vm.o\
 	semaphore.o\
+	rwlock.o\
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 

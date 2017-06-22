@@ -36,3 +36,12 @@
 #define SYS_semaphore_release     43
 #define SYS_semaphore_getcounter  44
 #define SYS_semaphore_free        45
+
+#define SYS_rwlock_create  		51
+#define SYS_rwlock_acquire_read 	52
+#define SYS_rwlock_acquire_write 	53
+#define SYS_rwlock_release_read 	54
+#define SYS_rwlock_release_write 	55
+#define SYS_rwlock_holding_read 	56
+#define SYS_rwlock_holding_write 	57
+#define SYS_rwlock_free    		58

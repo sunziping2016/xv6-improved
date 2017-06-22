@@ -5,3 +5,4 @@ typedef uint pde_t;
 
 typedef int userlock;
 typedef int usersem;
+typedef int userrwlock;
