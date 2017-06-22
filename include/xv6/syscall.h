@@ -24,5 +24,9 @@
 #define SYS_setcrtc 23
 #define SYS_getcurpos 24
 #define SYS_setcurpos 25
-#define SYS_playsound 26
-#define SYS_nosound 27
+#define SYS_geteditstatus 26
+#define SYS_seteditstatus 27
+#define SYS_mount  28
+#define SYS_unmount 29
+#define SYS_playsound 30
+#define SYS_nosound 31

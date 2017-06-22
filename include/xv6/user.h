@@ -29,6 +29,10 @@ int getcurpos();
 int setcurpos(int);
 void playsound(uint);
 void nosound();
+int mount(int, char*, int);
+int unmount(int);
+int geteditstatus();
+int seteditstatus(int);
 
 // ulib.c
 int stat(char*, struct stat*);
