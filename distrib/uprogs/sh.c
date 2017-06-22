@@ -19,7 +19,7 @@ char list[10][100];
 char hs[10][100];
 int length[10];
 int hlen[10];
-int iter = -1;
+int iter = 0;
 int count = 0;
 int nowhs = 0;
 
@@ -161,14 +161,10 @@ getcmd(char *buf, int nbuf)
     if(buf[0] == 0) // EOF
         return -1;
     int i;
-
-    if (iter < 0)
-        iter = 0;
     for(i=0;i<nbuf;i++)
     {
         list[iter][i] = buf [i];
     }
-
     length[iter] = nbuf;
     iter = (iter+1)%10;
     count++;
@@ -225,7 +221,7 @@ main(void)
             int order = iter;
             int mcount;
             if(count<10)
-                mcount = count - 1;
+                mcount = count;
             else
                 mcount = 10;
             printf(1, "\n");
@@ -264,7 +260,7 @@ main(void)
                 for(k=0;k<10;k++)
                     length[k] = 0;
                 count = 0;
-                iter = -1;
+                iter = 0;
                 continue;
             }
             if(buf[0] == 'c' && buf[1] == 'l')

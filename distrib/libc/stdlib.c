@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <xv6/types.h>
 #include <xv6/user.h>
 
 typedef long Align;

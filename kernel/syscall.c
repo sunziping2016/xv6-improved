@@ -105,6 +105,31 @@ extern int sys_geteditstatus(void);
 extern int sys_seteditstatus(void);
 extern int sys_gettime(void);
 
+extern int thread_create(void);
+extern int thread_exit(void);
+extern int thread_wait(void);
+
+extern int sys_lock_create(void);
+extern int sys_lock_acquire(void);
+extern int sys_lock_release(void);
+extern int sys_lock_holding(void);
+extern int sys_lock_free(void);
+
+extern int sys_semaphore_create(void);
+extern int sys_semaphore_acquire(void);
+extern int sys_semaphore_release(void);
+extern int sys_semaphore_getcounter(void);
+extern int sys_semaphore_free(void);
+
+extern int sys_rwlock_create(void);
+extern int sys_rwlock_acquire_read(void);
+extern int sys_rwlock_release_read(void);
+extern int sys_rwlock_holding_read(void);
+extern int sys_rwlock_acquire_write(void);
+extern int sys_rwlock_release_write(void);
+extern int sys_rwlock_holding_write(void);
+extern int sys_rwlock_free(void);
+
 static int (*syscalls[])(void) = {
     [SYS_fork]    sys_fork,
     [SYS_exit]    sys_exit,
@@ -138,6 +163,27 @@ static int (*syscalls[])(void) = {
     [SYS_playsound] sys_playsound,
     [SYS_nosound] sys_nosound,
     [SYS_gettime] sys_gettime,
+    [SYS_thread_create] thread_create,
+    [SYS_thread_exit]   thread_exit,
+    [SYS_thread_wait]   thread_wait,
+    [SYS_lock_create]  sys_lock_create,
+    [SYS_lock_acquire] sys_lock_acquire,
+    [SYS_lock_release] sys_lock_release,
+    [SYS_lock_holding] sys_lock_holding,
+    [SYS_lock_free]    sys_lock_free,
+    [SYS_semaphore_create]     sys_semaphore_create,
+    [SYS_semaphore_acquire]    sys_semaphore_acquire,
+    [SYS_semaphore_release]    sys_semaphore_release,
+    [SYS_semaphore_getcounter] sys_semaphore_getcounter,
+    [SYS_semaphore_free]       sys_semaphore_free,
+    [SYS_rwlock_create]  	sys_rwlock_create,
+    [SYS_rwlock_acquire_read] 	sys_rwlock_acquire_read,
+    [SYS_rwlock_release_read] 	sys_rwlock_release_read,
+    [SYS_rwlock_holding_read] 	sys_rwlock_holding_read,
+    [SYS_rwlock_acquire_write] 	sys_rwlock_acquire_write,
+    [SYS_rwlock_release_write] 	sys_rwlock_release_write,
+    [SYS_rwlock_holding_write] 	sys_rwlock_holding_write,
+    [SYS_rwlock_free]    	sys_rwlock_free,
 };
 
 void syscall(void)
