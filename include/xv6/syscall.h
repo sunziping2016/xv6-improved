@@ -24,5 +24,7 @@
 #define SYS_setcrtc 23
 #define SYS_getcurpos 24
 #define SYS_setcurpos 25
-#define SYS_mount  26
-#define SYS_unmount 27
+#define SYS_geteditstatus 26
+#define SYS_seteditstatus 27
+#define SYS_mount  28
+#define SYS_unmount 29

@@ -33,6 +33,7 @@ SYSCALL(getcrtc)
 SYSCALL(setcrtc)
 SYSCALL(getcurpos)
 SYSCALL(setcurpos)
+SYSCALL(geteditstatus)
+SYSCALL(seteditstatus)
 SYSCALL(mount)
 SYSCALL(unmount)
-

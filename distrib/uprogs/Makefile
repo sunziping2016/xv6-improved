@@ -4,7 +4,8 @@ include $(TOP_SRCDIR)/Makefile.common
 OUTDIR = $(BUILDDIR)/distrib/uprogs
 
 UPROGS = cat echo forktest grep init kill ln ls \
-		mkdir rm sh stressfs usertests wc zombie pwd reader mount
+		mkdir rm sh stressfs usertests wc zombie \
+		mount pwd reader vi bi
 
 
 ULIB = $(OUTDIR)/../ulib/ulib.a

@@ -29,6 +29,8 @@ int getcurpos();
 int setcurpos(int);
 int mount(int, char*, int);
 int unmount(int);
+int geteditstatus();
+int seteditstatus(int);
 
 // ulib.c
 int stat(char*, struct stat*);
