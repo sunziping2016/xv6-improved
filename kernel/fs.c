@@ -28,6 +28,7 @@ static void itrunc(struct inode*);
 // only one device
 struct superblock sb;
 
+extern int  used_capcity, useable_capcity;
 // Read the super block.
 void
 readsb(int dev, struct superblock *sb)
@@ -70,6 +71,8 @@ balloc(uint dev)
                 log_write(bp);
                 brelse(bp);
                 bzero(dev, b + bi);
+                used_capcity += BSIZE;
+                //cprintf("2 used capcity : %d KB\n", used_capcity/KBSIZE);
                 return b + bi;
             }
         }
@@ -94,6 +97,7 @@ bfree(int dev, uint b)
     bp->data[bi / 8] &= ~m;
     log_write(bp);
     brelse(bp);
+    used_capcity -= BSIZE;
 }
 
 // Inodes.
@@ -160,7 +164,6 @@ struct {
     struct spinlock lock;
     struct inode inode[NINODE];
 } icache;
-
 void
 iinit(int dev)
 {
@@ -176,6 +179,11 @@ iinit(int dev)
  inodestart %d bmap start %d\n", sb.size, sb.nblocks,
             sb.ninodes, sb.nlog, sb.logstart, sb.inodestart,
             sb.bmapstart);
+    uint nmeta;  //nmeta Number of meta blocks (boot, sb, nlog, inode, bitmap)
+    nmeta = 1+1+sb.nlog + (sb.ninodes/IPB+1) + (sb.size/(BSIZE * 8) + 1);
+    useable_capcity = (sb.size-nmeta) * BSIZE;
+    used_capcity = (sb.initusedblock - nmeta) * BSIZE;
+    //cprintf("useable capcity : %d KB\n", useable_capcity/KBSIZE);
 }
 
 static struct inode* iget(uint dev, uint inum);
@@ -211,7 +219,6 @@ iupdate(struct inode *ip)
 {
     struct buf *bp;
     struct dinode *dip;
-
     bp = bread(ip->dev, IBLOCK(ip->inum, sb));
     dip = (struct dinode*)bp->data + ip->inum % IPB;
     dip->type = ip->type;
@@ -476,9 +483,10 @@ deffsread(struct inode *ip, char *dst, uint off, uint n)
     struct buf *bp;
 
     if (ip->type == T_DEV) {
-        if (ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].read)
+        if (ip->major < 0 ||ip->minor < 0 || ip->major >= NDEV || ip->minor >= MDEV
+          || !devsw[ip->major][ip->minor].read)
             return -1;
-        return devsw[ip->major].read(ip, dst, n);
+        return devsw[ip->major][ip->minor].read(ip, dst, off, n);
     }
 
     if (off > ip->size || off + n < off)
@@ -510,10 +518,11 @@ deffswrite(struct inode *ip, char *src, uint off, uint n)
     uint tot, m;
     struct buf *bp;
 
-    if (ip->type == T_DEV) {
-        if (ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].write)
+    if(ip->type == T_DEV) {
+        if (ip->major < 0 ||ip->minor < 0 || ip->major >= NDEV || ip->minor >= MDEV
+          || !devsw[ip->major][ip->minor].write)
             return -1;
-        return devsw[ip->major].write(ip, src, n);
+        return devsw[ip->major][ip->minor].write(ip, src, off, n);
     }
 
     if (off > ip->size || off + n < off)

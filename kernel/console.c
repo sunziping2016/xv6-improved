@@ -318,7 +318,7 @@ consoleintr(int (*getc)(void))
 }
 
 int
-consoleread(struct inode *ip, char *dst, int n)
+consoleread(struct inode *ip, char *dst, uint off, int n)
 {
     uint target;
     int c;
@@ -356,7 +356,7 @@ consoleread(struct inode *ip, char *dst, int n)
 }
 
 int
-consolewrite(struct inode *ip, char *buf, int n)
+consolewrite(struct inode *ip, char *buf, uint off, int n)
 {
     int i;
 
@@ -375,11 +375,10 @@ consoleinit(void)
 {
     initlock(&cons.lock, "console");
 
-    devsw[CONSOLE].write = consolewrite;
-    devsw[CONSOLE].read = consoleread;
+    devsw[NCONSOLE][MCONSOLE].write = consolewrite;
+    devsw[NCONSOLE][MCONSOLE].read = consoleread;
     cons.locking = 1;
 
     picenable(IRQ_KBD);
     ioapicenable(IRQ_KBD, 0);
 }
-

@@ -6,6 +6,15 @@ OUTDIR = $(BUILDDIR)/kernel
 OBJS = \
 	bio.o\
 	console.o\
+	devzero.o\
+	devrandom.o\
+	devnull.o\
+	devfull.o\
+	devhda.o\
+	sound.o\
+	devsound.o\
+	devhdainfo.o\
+	devperfctr.o\
 	entry.o\
 	exec.o\
 	file.o\

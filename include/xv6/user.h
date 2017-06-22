@@ -27,6 +27,8 @@ int getcrtc(int, int);
 int setcrtc(int, int);
 int getcurpos();
 int setcurpos(int);
+void playsound(uint);
+void nosound();
 int mount(int, char*, int);
 int unmount(int);
 int geteditstatus();

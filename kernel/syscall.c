@@ -99,6 +99,8 @@ extern int sys_getcrtc(void);
 extern int sys_setcrtc(void);
 extern int sys_getcurpos(void);
 extern int sys_setcurpos(void);
+extern int sys_playsound(void);
+extern int sys_nosound(void);
 extern int sys_geteditstatus(void);
 extern int sys_seteditstatus(void);
 
@@ -132,12 +134,13 @@ static int (*syscalls[])(void) = {
     [SYS_seteditstatus] sys_seteditstatus,
     [SYS_mount]   sys_mount,
     [SYS_unmount]   sys_unmount,
+    [SYS_playsound] sys_playsound,
+    [SYS_nosound] sys_nosound,
 };
 
 void syscall(void)
 {
     int num;
-
     num = proc->tf->eax;
     if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {
         proc->tf->eax = syscalls[num]();
