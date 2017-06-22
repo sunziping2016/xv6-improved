@@ -26,6 +26,7 @@ OBJS = \
 	lapic.o\
 	log.o\
 	main.o\
+	mount.o\
 	mp.o\
 	picirq.o\
 	pipe.o\
