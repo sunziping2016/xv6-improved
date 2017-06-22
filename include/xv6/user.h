@@ -27,6 +27,8 @@ int getcrtc(int, int);
 int setcrtc(int, int);
 int getcurpos();
 int setcurpos(int);
+int geteditstatus();
+int seteditstatus(int);
 
 // ulib.c
 int stat(char*, struct stat*);

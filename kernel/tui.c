@@ -12,6 +12,8 @@
 #include "xv6/spinlock.h"
 #include "xv6/sleeplock.h"
 
+extern int editStatus;
+
 static struct {
     struct spinlock lock;
     int locking;
@@ -84,4 +86,17 @@ sys_setcurpos(void)
     outb(CRTPORT + 1, pos);
     //release(&cons.lock);
     return 1;
+}
+
+int
+sys_geteditstatus(void)
+{
+    return editStatus;
+}
+
+int
+sys_seteditstatus(void)
+{
+    argint(0, &editStatus);
+    return editStatus;
 }

@@ -97,6 +97,8 @@ extern int sys_getcrtc(void);
 extern int sys_setcrtc(void);
 extern int sys_getcurpos(void);
 extern int sys_setcurpos(void);
+extern int sys_geteditstatus(void);
+extern int sys_seteditstatus(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]    sys_fork,
@@ -124,6 +126,8 @@ static int (*syscalls[])(void) = {
     [SYS_setcrtc] sys_setcrtc,
     [SYS_getcurpos] sys_getcurpos,
     [SYS_setcurpos] sys_setcurpos,
+    [SYS_geteditstatus] sys_geteditstatus,
+    [SYS_seteditstatus] sys_seteditstatus,
 };
 
 void syscall(void)
