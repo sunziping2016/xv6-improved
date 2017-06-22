@@ -13,6 +13,7 @@ struct superblock;
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
+struct buf*     bget(uint dev, uint blockno);
 void            brelse(struct buf*);
 void            bwrite(struct buf*);
 
@@ -22,11 +23,20 @@ void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 void            panic(char*) __attribute__((noreturn));
 
-//devsound.c
-void            soundinit(void);
-
 //devprefctr.c
 void            perfctrinit(void);
+//devzero.c
+void            zeroinit(void);
+//devnull.c
+void            nullinit(void);
+//devrandom.c
+void            randominit(void);
+void            mix_source_entropy();
+//devhda.c
+void            hdainit(void);
+void            hdainfoinit(void);
+//devsound.c
+void            soundinit(void);
 // exec.c
 int             exec(char*, char**);
 

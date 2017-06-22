@@ -35,7 +35,7 @@ static struct
     int locking;
 }sound;
 
-void 
+void
 soundplayc(char ch)
 {
     int tone = ch - '0';
@@ -54,7 +54,7 @@ soundplayc(char ch)
 }
 
 int
-soundread(struct inode *ip, char *dst, int n)
+soundread(struct inode *ip, char *dst, uint off, int n)
 {
     iunlock(ip);
     acquire(&sound.lock);
@@ -62,8 +62,8 @@ soundread(struct inode *ip, char *dst, int n)
     ilock(ip);
     return 0;
 }
-int 
-soundwrite(struct inode *ip, char *buf, int n)
+int
+soundwrite(struct inode *ip, char *buf, uint off, int n)
 {
     int i;
     iunlock(ip);
@@ -81,5 +81,13 @@ soundinit(void)
 
     devsw[SOUND].write = soundwrite;
     devsw[SOUND].read = soundread;
+    sound.locking = 1;
+}
+void
+soundinit(void)
+{
+    initlock(&sound.lock, "devsound");
+    devsw[NDEVSOUND][MDEVSOUND].write = soundwrite;
+    devsw[NDEVSOUND][MDEVSOUND].read = soundread;
     sound.locking = 1;
 }

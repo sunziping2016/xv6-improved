@@ -29,14 +29,31 @@ struct inode {
 // table mapping major device number to
 // device functions
 struct devsw {
-  int (*read)(struct inode*, char*, int);
-  int (*write)(struct inode*, char*, int);
+  int (*read)(struct inode*, char*, int, int);
+  int (*write)(struct inode*, char*, int, int);
 };
 
-extern struct devsw devsw[];
+extern struct devsw devsw[][MDEV];
 
-#define CONSOLE 1
-#define SOUND 2
-#define PERFCTR 3
+
+
+#define NDEVHDA  2
+#define MDEVHDA  1
+#define NDEVHDAINFO 2
+#define MDEVHDAINFO 2
+#define NCONSOLE 1
+#define MCONSOLE 1
+#define NDEVSOUND 1
+#define MDEVSOUND 2
+#define NDEVNULL 1
+#define MDEVNULL 3
+#define NDEVZERO 1
+#define MDEVZERO 4
+#define NDEVRANDOM 1
+#define MDEVRANDOM 5
+#define NDEVURANDOM 1
+#define MDEVURANDOM 6
+#define NDEVPERFCTR 1
+#define MDEVPERFCTR 7
 //PAGEBREAK!
 // Blank page.

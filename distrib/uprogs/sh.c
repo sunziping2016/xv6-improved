@@ -4,7 +4,6 @@
 #include "xv6/user.h"
 #include "xv6/fcntl.h"
 #include "xv6/stat.h"
-
 // Parsed command representation
 #define EXEC  1
 #define REDIR 2
@@ -96,6 +95,14 @@ runcmd(struct cmd *cmd)
         }
       close(fd);
     }
+        if(fstat(fd, &st) >=0){
+            if(st.type == T_DEV && (rcmd->mode & O_CREATE))
+              {
+                rcmd->mode -= O_CREATE;
+            }
+          }
+          close(fd);
+        }
         if (open(rcmd->file, rcmd->mode) < 0) {
             printf(2, "open %s failed\n", rcmd->file);
             exit();
