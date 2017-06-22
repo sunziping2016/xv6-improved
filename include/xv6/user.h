@@ -1,3 +1,6 @@
+#ifndef USER_H
+#define USER_H
+
 struct stat;
 struct rtcdate;
 
@@ -34,3 +37,8 @@ int stat(char*, struct stat*);
 void printf(int, char*, ...);
 char* gets(char*, int max);
 int atoi(const char*);
+
+#include <stdlib.h>
+#include <string.h>
+
+#endif
