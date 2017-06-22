@@ -22,7 +22,7 @@ int hdaread(struct inode *ip, char *dst, uint off, uint n)
 {
   int target;
   target = n;
-  off += block_off;
+  off = block_off;
   uint nmeta;  //nmeta Number of meta blocks (boot, sb, nlog, inode, bitmap)
   nmeta = 1+1+sb.nlog + (sb.ninodes/IPB+1) + (sb.size/(BSIZE * 8) + 1);
   if(off <= nmeta || off > sb.size)
@@ -39,12 +39,12 @@ int hdaread(struct inode *ip, char *dst, uint off, uint n)
     while(n > 0)
     {
       b = bread(ROOTDEV, off);
-      off++;
       for(i = 0; i < BSIZE && n > 0; i++)
       {
         n--;
         dst[i] = b->data[i];
       }
+      brelse(b);
     }
     cprintf("read from block %d success\n", off);
   }
@@ -56,12 +56,12 @@ int hdawrite(struct inode *ip, char *cbuf, uint off, uint n)
 {
   int target;
   target = n;
-  off += block_off;
+  off = block_off;
   uint nmeta;  //nmeta Number of meta blocks (boot, sb, nlog, inode, bitmap)
   nmeta = 1+1+sb.nlog + (sb.ninodes/IPB+1) + (sb.size/(BSIZE * 8) + 1);
   if(off <= nmeta || off > sb.size)
   {
-    cprintf("permission denied\n");
+    cprintf("permission denied %d\n", block_off);
     return n;
   }
   iunlock(ip);
@@ -78,6 +78,7 @@ int hdawrite(struct inode *ip, char *cbuf, uint off, uint n)
         b->data[i] = cbuf[i];
       }
       bwrite(b);
+      brelse(b);
     }
     cprintf("write to block %d success\n", off);
   }

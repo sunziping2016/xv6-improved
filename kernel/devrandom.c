@@ -212,8 +212,8 @@ static char digits[] = "0123456789abcdef";
         if(key0 == -1)
         {
           key0 = extract_entropy();
-          int sleep = 0;
-          while ( sleep < ((ticks % 40 + 60)*20000))sleep++;
+          int sleep_random = 0;
+          while (sleep_random < ((ticks % 40 + 60)*20000))sleep_random++;
           *dst= digits[key0];
           n--;
           cons.e++;
@@ -277,9 +277,9 @@ static char digits[] = "0123456789abcdef";
        buf++;
        cons.w++;
        n--;
-       int sleep = 0;
-       while ( sleep < ((ticks % 40 + 60)*2000))sleep++;
-       key += (second_entropy.init_entropy*(ticks+ucons.w)+ sleep)%32767;
+       int sleep_random = 0;
+       while ( sleep < ((ticks % 40 + 60)*2000))sleep_random++;
+       key += (second_entropy.init_entropy*(ticks+ucons.w)+ sleep_random)%32767;
        second_entropy.init_entropy = key;
        key = trans_entropy(key, 1);
        mix_second_entropy(key);
