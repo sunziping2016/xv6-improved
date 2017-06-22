@@ -157,6 +157,7 @@ int fork(void)
     np->sz = proc->sz;
     np->parent = proc;
     *np->tf = *proc->tf;
+    np->blocked = proc->blocked;
 
     // Clear %eax so that fork returns 0 in the child.
     np->tf->eax = 0;
@@ -480,5 +481,65 @@ procdump(void)
                 cprintf(" %p", pc[i]);
         }
         cprintf("\n");
+    }
+}
+
+int sigkill(int pid, int sig)
+{
+    if(sig == 0)
+    {
+        return -1;
+    }
+    else if(pid > 0)
+    {
+        struct proc *p;
+        acquire(&ptable.lock);
+        for (;;) {
+            // Scan through table looking for exited children.
+            for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+                if (p->pid == pid)
+                    break;
+            }
+            if(!sigismember(&(p->blocked), sig) || sig == SIGKILL || sig == SIGSTOP)
+            {
+                release(&ptable.lock);
+                proc = p;
+                p->sighand.action[sig - 1].sa_handler(sig);
+            }
+            else
+            {
+                sigaddset(&(p->pending.signal), sig);
+            }
+            release(&ptable.lock);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void sigdefhandler(int sig)
+{
+    void *p = 0;
+    if(sig == SIGALRM || sig == SIGHUP || sig == SIGINT || sig == SIGKILL || sig == SIGPIPE || sig == SIGTERM || sig == SIGUSR1 || sig == SIGUSR2 || sig == SIGPOLL || sig == SIGPROF || sig == SIGVTALRM)
+    {
+        exit();
+    }
+    else if(sig == SIGABRT || sig == SIGBUS || sig == SIGFPE || sig == SIGILL || sig == SIGQUIT || sig == SIGSEGV || sig == SIGSYS || sig == SIGTRAP || sig == SIGXCPU || sig == SIGXFSZ)
+    {
+        exit();
+    }
+    else if(sig == SIGCHLD || sig == SIGURG)
+    {
+        return;
+    }
+    else if(sig == SIGSTOP || sig == SIGTSTP || sig == SIGTTIN || sig == SIGTTOU)
+    {
+        acquire(&ptable.lock);
+        sleep(p, &ptable.lock);
+        release(&ptable.lock);
+    }
+    else if(sig == SIGCONT)
+    {
+        wakeup(p);
     }
 }

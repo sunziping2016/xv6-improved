@@ -11,9 +11,9 @@
 extern struct {
     struct spinlock lock;
     struct proc proc[NPROC];
-} ptable;
+}ptable;
 
-int    sigemptyset(sigset_t *set)
+int sigemptyset(sigset_t *set)
 {
     set->number = 0;
     for(int i = 0; i < _SIG_NUM; i++)
@@ -37,7 +37,7 @@ int sigfillset(sigset_t *set)
     return 0;
 }
 
-int    sigaddset(sigset_t *set, int signo)
+int sigaddset(sigset_t *set, int signo)
 {
     if(!sigismember(set, signo))
     {
@@ -47,7 +47,7 @@ int    sigaddset(sigset_t *set, int signo)
     return 0;
 }
 
-int  sigdelset(sigset_t *set, int signo)
+int sigdelset(sigset_t *set, int signo)
 {
     if(sigismember(set, signo))
     {
@@ -91,73 +91,22 @@ int sigisemptyset(sigset_t *set)
 int sigaction(int sig, const struct sigaction *act,
               struct sigaction *oact)
 {
-    //struct proc *current;
-    // Enable interrupts on this processor.
-    //sti();
-
-    // Loop over process table looking for process to run.
-    //acquire(&ptable.lock);
-    //current = &ptable.proc[1];
-    //for (current = ptable.proc; current < &ptable.proc[NPROC]; current++) {
-    //if (current->state == RUNNING)
-    //break;
-    //}
-    //release(&ptable.lock);
-    //struct proc *p = current, *t;
     struct sigaction *k;
-    //sigset_t mask;
-    //if (!valid_signal(sig) || sig < 1 || (act && sig_kernel_only(sig)))
-    //return EINVAL;
     k = &(proc->sighand.action[sig - 1]);
-    //spin_lock_irq(&p->sighand->siglock);
     if (oact)
         *oact = *k;
-
     if (act) {
-        //sigdelsetmask(&act->sa_mask,
-        //sigmask(SIGKILL) | sigmask(SIGSTOP));
-        //*k = *act;
         *k = *act;
-        //if (sig_handler_ignored(sig_handler(p, sig), sig)) {
-        //sigemptyset(&mask);
-        //sigaddset(&mask, sig);
-        //flush_sigqueue_mask(&mask, &p->signal->shared_pending);
-        //for_each_thread(p, t)
-        //flush_sigqueue_mask(&mask, &t->pending);
-        //}
     }
-
-    //spin_unlock_irq(&p->sighand->siglock);
     return 0;
 }
 
 
-int sigkill(int pid, int sig)
+
+int killpg(int pgrp, int sig)
 {
-    if(sig == 0)
-    {
-        return -1;
-    }
-    else if(pid > 0)
-    {
-        struct proc *p;
-        acquire(&ptable.lock);
-        for (;;) {
-            // Scan through table looking for exited children.
-            for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-                if (p->pid == pid)
-                    break;
-            }
-            if(!sigismember(&(p->blocked), sig) || sig == SIGKILL || sig == SIGSTOP)
-            {
-                release(&ptable.lock);
-                proc = p;
-                p->sighand.action[sig - 1].sa_handler(sig);
-            }
-            release(&ptable.lock);
-            return 1;
-        }
-    }
+    if(pgrp > 1)
+        sigkill(pgrp, sig);
     return 0;
 }
 
@@ -195,8 +144,6 @@ int siginterrupt(int sig, int flag)
 {
     int ret;
     struct sigaction act;
-
-
     (void) sigaction(sig, ((void*)0), &act);
     if (flag)
         act.sa_flags &= ~SA_RESTART;
@@ -247,7 +194,7 @@ void (*sigset(int sig, void (*disp)(int)))(int)
     else
     {
         struct sigaction act, oact;
-        act.sa_handler = disp;
+        act.sa_handler = *disp;
         act.sa_flags = SA_RESTART;
         sigemptyset(&act.sa_mask);
         sigaddset(&act.sa_mask, sig);
@@ -282,31 +229,48 @@ int    sigprocmask(int how, const sigset_t *restrict set, sigset_t *restrict ose
     return 0;
 }
 
-void sigdefhandler(int sig)
+void (*signal(int sig, void (*func)(int)))(int)
 {
-    void *p = 0;
-    if(sig == SIGALRM || sig == SIGHUP || sig == SIGINT || sig == SIGKILL || sig == SIGPIPE || sig == SIGTERM || sig == SIGUSR1 || sig == SIGUSR2 || sig == SIGPOLL || sig == SIGPROF || sig == SIGVTALRM)
+    if(func == SIG_IGN)
     {
-        exit();
+        sigignore(sig);
     }
-    else if(sig == SIGABRT || sig == SIGBUS || sig == SIGFPE || sig == SIGILL || sig == SIGQUIT || sig == SIGSEGV || sig == SIGSYS || sig == SIGTRAP || sig == SIGXCPU || sig == SIGXFSZ)
+    else if(func == SIG_DEF)
     {
-        exit();
+        struct sigaction act, oact;
+        act.sa_handler = sigdefhandler;
+        act.sa_flags = SA_RESTART;
+        sigemptyset(&act.sa_mask);
+        sigaddset(&act.sa_mask, sig);
+        if (sigaction(sig, &act, &oact) == -1)
+            return(SIG_ERR);
+        return(oact.sa_handler);
     }
-    else if(sig == SIGCHLD || sig == SIGURG)
+    else
     {
-        return;
-    }
-    else if(sig == SIGSTOP || sig == SIGTSTP || sig == SIGTTIN || sig == SIGTTOU)
-    {
-        acquire(&ptable.lock);
-        sleep(p, &ptable.lock);
-        release(&ptable.lock);
-    }
-    else if(sig == SIGCONT)
-    {
-        wakeup(p);
+        struct sigaction act, oact;
+        act.sa_handler = func;
+        act.sa_flags = SA_RESTART;
+        sigemptyset(&act.sa_mask);
+        sigaddset(&act.sa_mask, sig);
+        if (sigaction(sig, &act, &oact) == -1)
+            return(SIG_ERR);
+        return(oact.sa_handler);
     }
 }
+
+
+int sigpending(sigset_t *set)
+{
+    *set = proc->pending.signal;
+}
+
+int sigsuspend(const sigset_t *sigmask)
+{
+    sigset_t temp_set = proc->blocked;
+    proc->blocked = *sigmask;
+    return 0;
+}
+
 
 
