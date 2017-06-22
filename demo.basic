@@ -1,0 +1,15 @@
+PRINT "LINE = "
+INPUT A
+IF A < 10
+    FOR B = 1 TO A
+        FOR C = 1 TO A - B
+            PRINT " "
+        ENDFOR
+        FOR D = 1 TO 2*B-1
+            PRINT "*"
+        ENDFOR
+        PRINT "\n"
+    ENDFOR
+ELSE
+    PRINT "NO\n"
+ENDIF
