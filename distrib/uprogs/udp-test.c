@@ -58,7 +58,7 @@ void master_proc()
     char buffer[100];
     while (true)
     { 
-        gets(buffer);
+        mygets(buffer);
         sendto(sock, buffer, strlen(buffer)+1, 0, (struct sockaddr*)(&worker_addr), sizeof(worker_addr));
         if (strcmp(buffer, "exit")==0)
             break;
