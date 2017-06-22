@@ -4,10 +4,12 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+static char stdin_buffer[BUFSIZ];
+
 FILE _std_files[3] = {
-        {0},
-        {1},
-        {2},
+        {0, BUFSIZ, 0, 0, 0, stdin_buffer, __SRD},
+        {1, 0, 0, 0, 0, 0, __SWR},
+        {2, 0, 0, 0, 0, 0, __SWR},
 };
 
 #define        MAXEXP          308
@@ -87,6 +89,7 @@ static int __sprint(FILE *fp, register struct __suio *uio)
 }
 
 #include <math.h>
+#include <stdlib.h>
 
 #define FLOATING_POINT
 
@@ -2862,16 +2865,43 @@ int fputs(const char *s, FILE *fp)
     return (__sfvwrite(fp, &uio));
 }
 
-#include "xv6/user.h"
+
+int __srefill(register FILE *fp)
+{
+    int i;
+    char c;
+    if (!fp || fp->flags & __SWR)
+        return (EOF);
+    if(fp->reserve)
+        return 0;
+    for(i = 0; i < BUFSIZ / 2; ++i)
+    {
+        if((read(fp->fd, &c, 1)) < 1)
+            break;
+        //myprintf("%d    ", c);
+        fp->buffer[fp->buffer_end] = c;
+        fp->buffer_end = (fp->buffer_end + 1) % fp->buffer_size;
+        ++fp->reserve;
+        if(c == '\n' || c == '\r')
+            break;
+    }
+    //myprintf("out\n");
+    if(fp->reserve)
+        return 0;
+    return EOF;
+}
 
 int	__srget (FILE *fp)
 {
-    int i, cc;
     char c;
-    cc = read(fp->fd, &c, 1);
-    if (cc < 1)
-        return EOF;
-    return c;
+    if(__srefill(fp) == 0)
+    {
+        --fp->reserve;
+        c = fp->buffer[fp->cur];
+        fp->cur = (fp->cur + 1) % fp->buffer_size;
+        return c;
+    }
+    return EOF;
 }
 
 int __sputc (int _c, FILE *_p)
@@ -2901,9 +2931,7 @@ char *fgets(char *buf, int max, FILE *fp)
     int i, cc;
     char c;
     for (i = 0; i + 1 < max; ) {
-        cc = read(fp->fd, &c, 1);
-        if (cc < 1)
-            break;
+        c = getc(fp);
         if (c == EOF && i == 0)
             return NULL;
         if (c == '\n' || c == '\r')
@@ -2913,6 +2941,7 @@ char *fgets(char *buf, int max, FILE *fp)
     buf[i] = '\0';
     return buf;
 }
+
 
 #define O_RDONLY  0x000
 #define O_WRONLY  0x001
@@ -2953,9 +2982,63 @@ FILE *fopen(const char *file, const char *mode)
 
     if ((flags = __sflags(mode, &oflags)) == 0)
         return (NULL);
-    if ((f = open(file, O_RDONLY)) < 0) {
+    if ((f = open(file, oflags)) < 0) {
         return (NULL);
+    }
+    fp = malloc(sizeof(FILE));
+    if(oflags == O_RDONLY || oflags == O_RDWR)
+    {
+        fp->buffer_size = BUFSIZ;
+        fp->buffer_end = 0;
+        fp->buffer = malloc(fp->buffer_size * sizeof(char));
+        fp->cur = 0;
+        fp->reserve = 0;
+    }
+    else
+        fp->buffer = 0;
+    switch (oflags)
+    {
+        case O_RDONLY:
+            fp->flags = __SRD;
+            break;
+        case O_WRONLY:
+            fp->flags = __SWR;
+            break;
+        case O_RDWR:
+            fp->flags = __SRW;
+            break;
+        default:
+            fp->flags = 0;
     }
     fp->fd = f;
     return (fp);
+}
+
+int fclose(FILE *fp)
+{
+    if (!fp || (fp->flags == 0)) {	/* not open! */
+        return (EOF);
+    }
+    close(fp->fd);
+    if(fp->buffer)
+        free(fp->buffer);
+    fp->buffer = 0;
+    fp->flags = 0;
+    fp->buffer_end = 0;
+    fp->cur = 0;
+    fp->fd = -1;
+    return 0;
+}
+
+int ungetc(int ch, FILE *stream)
+{
+    if(!stream->buffer)
+        return EOF;
+    int prev = stream->cur ? stream->cur - 1 : stream->buffer_size - 1;
+    if(prev == stream->buffer_end)
+        return EOF;
+    stream->buffer[prev] = ch;
+    stream->cur = prev;
+    ++stream->reserve;
+    return 0;
 }
