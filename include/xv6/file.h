@@ -37,5 +37,6 @@ extern struct devsw devsw[];
 
 #define CONSOLE 1
 #define SOUND 2
+#define PERFCTR 3
 //PAGEBREAK!
 // Blank page.

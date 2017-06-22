@@ -25,6 +25,8 @@ void            panic(char*) __attribute__((noreturn));
 //devsound.c
 void            soundinit(void);
 
+//devprefctr.c
+void            perfctrinit(void);
 // exec.c
 int             exec(char*, char**);
 

@@ -27,6 +27,7 @@ main(void)
     ioapicinit();    // another interrupt controller
     consoleinit();   // console hardware
     soundinit();     // sound device
+    perfctrinit();   // performance counter device
     uartinit();      // serial port
     pinit();         // process table
     tvinit();        // trap vectors

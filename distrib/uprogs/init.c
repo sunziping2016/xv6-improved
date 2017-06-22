@@ -17,6 +17,7 @@ main(void)
         open("console", O_RDWR);
     }
     mknod("sound", 2, 1);
+    mknod("perfctr", 3, 1);
     dup(0);  // stdout
     dup(0);  // stderr
 
