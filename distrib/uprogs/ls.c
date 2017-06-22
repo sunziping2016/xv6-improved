@@ -17,7 +17,7 @@ fmtname(char *path)
     // Return blank-padded name.
     if (strlen(p) >= DIRSIZ)
         return p;
-    memmove(buf, p, strlen(p));
+    memcpy(buf, p, strlen(p));
     memset(buf + strlen(p), ' ', DIRSIZ - strlen(p));
     return buf;
 }
@@ -57,7 +57,7 @@ ls(char *path)
         while (read(fd, &de, sizeof(de)) == sizeof(de)) {
             if (de.inum == 0)
                 continue;
-            memmove(p, de.name, DIRSIZ);
+            memcpy(p, de.name, DIRSIZ);
             p[DIRSIZ] = 0;
             if (stat(buf, &st) < 0) {
                 printf(1, "ls: cannot stat %s\n", buf);

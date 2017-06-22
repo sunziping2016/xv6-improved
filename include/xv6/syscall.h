@@ -28,5 +28,6 @@
 #define SYS_seteditstatus 27
 #define SYS_mount  28
 #define SYS_unmount 29
-#define SYS_playsound 30
-#define SYS_nosound 31
+#define SYS_gettime 30
+#define SYS_playsound 35
+#define SYS_nosound 34

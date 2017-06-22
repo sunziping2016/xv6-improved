@@ -103,6 +103,7 @@ extern int sys_playsound(void);
 extern int sys_nosound(void);
 extern int sys_geteditstatus(void);
 extern int sys_seteditstatus(void);
+extern int sys_gettime(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]    sys_fork,
@@ -136,6 +137,7 @@ static int (*syscalls[])(void) = {
     [SYS_unmount]   sys_unmount,
     [SYS_playsound] sys_playsound,
     [SYS_nosound] sys_nosound,
+    [SYS_gettime] sys_gettime,
 };
 
 void syscall(void)

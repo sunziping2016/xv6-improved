@@ -4,6 +4,8 @@
 #include "xv6/user.h"
 #include "xv6/fcntl.h"
 #include "xv6/stat.h"
+//#include <stdio.h>
+
 // Parsed command representation
 #define EXEC  1
 #define REDIR 2
@@ -159,10 +161,14 @@ getcmd(char *buf, int nbuf)
     if(buf[0] == 0) // EOF
         return -1;
     int i;
+
+    if (iter < 0)
+        iter = 0;
     for(i=0;i<nbuf;i++)
     {
         list[iter][i] = buf [i];
     }
+
     length[iter] = nbuf;
     iter = (iter+1)%10;
     count++;
