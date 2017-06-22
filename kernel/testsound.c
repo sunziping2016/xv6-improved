@@ -186,4 +186,5 @@ main(int argc, char *argv[])
     char a[10];
     read(0, a, 2);
     exit();
+
 }

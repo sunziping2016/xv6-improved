@@ -26,6 +26,13 @@ main(void)
     picinit();       // another interrupt controller
     ioapicinit();    // another interrupt controller
     consoleinit();   // console hardware
+    perfctrinit();   // performance counter device
+    nullinit();      // /dev/null
+    zeroinit();      // /dev/zero
+    soundinit();     // /dev/sound
+    randominit();    // /dev/random /dev/urandom
+    hdainit();       // /dev/hda
+    hdainfoinit();   // /dev/hdainfo
     uartinit();      // serial port
     pinit();         // process table
     tvinit();        // trap vectors
