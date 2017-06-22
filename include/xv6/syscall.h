@@ -20,14 +20,6 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
-<<<<<<< HEAD
-#define SYS_getcrtc 22
-#define SYS_setcrtc 23
-#define SYS_getcurpos 24
-#define SYS_setcurpos 25
-#define SYS_gettime 26
-#define SYS_sockcall 27
-=======
 
 #define SYS_thread_create 22
 #define SYS_thread_exit   23
@@ -76,4 +68,10 @@
 #define SYS_playsound 77
 #define SYS_nosound 78
 
->>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
+#define SYS_getcrtc 79
+#define SYS_setcrtc 80
+#define SYS_getcurpos 81
+#define SYS_setcurpos 82
+#define SYS_gettime 83
+#define SYS_sockcall 84
+

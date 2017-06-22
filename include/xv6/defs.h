@@ -207,7 +207,6 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
-<<<<<<< HEAD
 //[ Xv6 Networking ] Extra kernel functions
 // kernel-extra/core/kernel-init.c
 extern void     kernel_extra_init();
@@ -216,7 +215,6 @@ extern void     kernel_extra_init();
 extern int      sockread(struct file*, char*, int);
 extern int      sockwrite(struct file*, char*, int);
 extern int      sockclose(struct file*);
-=======
 void            freestackvm(pde_t *pgdir, uint stack);
 pde_t*          copystackuvm(pde_t *pgdir, uint sz, uint stack);
 
@@ -229,7 +227,6 @@ void            initsemaphore(struct semaphore*, int, char*);
 void            acquiresemaphore(struct semaphore*);
 void            releasesemaphore(struct semaphore*);
 int             getcounter(struct semaphore*);
->>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

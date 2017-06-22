@@ -44,11 +44,8 @@ main(void)
         timerinit();   // uniprocessor timer
     startothers();   // start other processors
     kinit2(P2V(4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
-<<<<<<< HEAD
     kernel_extra_init();
-=======
     mountinit();     // first mount
->>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
     userinit();      // first user process
     mpmain();        // finish this processor's setup
 }

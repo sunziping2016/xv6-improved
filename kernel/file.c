@@ -99,7 +99,7 @@ filestat(struct file *f, struct stat *st)
 int
 fileread(struct file *f, char *addr, int n)
 {
-<<<<<<< HEAD
+/*<<<<<<< HEAD
   int r;
 
   if(f->readable == 0)
@@ -118,6 +118,7 @@ fileread(struct file *f, char *addr, int n)
     return sockread(f, addr, n);
   panic("fileread");
 =======
+*/
     int r;
     mix_source_entropy();
     if (f->readable == 0)
@@ -132,7 +133,7 @@ fileread(struct file *f, char *addr, int n)
         return r;
     }
     panic("fileread");
->>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
+//>>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
 }
 
 //PAGEBREAK!
@@ -140,7 +141,7 @@ fileread(struct file *f, char *addr, int n)
 int
 filewrite(struct file *f, char *addr, int n)
 {
-<<<<<<< HEAD
+/*<<<<<<< HEAD
   int r;
 
   if(f->writable == 0)
@@ -174,6 +175,7 @@ filewrite(struct file *f, char *addr, int n)
         panic("short filewrite");
       i += r;
 =======
+*/
     int r;
     mix_source_entropy();
     if (f->writable == 0)
@@ -207,9 +209,9 @@ filewrite(struct file *f, char *addr, int n)
             i += r;
         }
         return i == n ? n : -1;
->>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
-    }
-    return i == n ? n : -1;
+//>>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
+//    }
+//    return i == n ? n : -1;
   }
   //[ Xv6 Networking ] Write to socket
   if (f->type == FD_SOCK)

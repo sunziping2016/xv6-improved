@@ -46,7 +46,6 @@ OBJS = \
 	trapasm.o\
 	vectors.o\
 	vm.o\
-<<<<<<< HEAD
         kernel_init.o\
         mem_pool.o\
         estring.o\
@@ -56,10 +55,8 @@ OBJS = \
         inet_local_iface.o\
         inet_routing.o\
         inet_dgram.o\
-=======
 	semaphore.o\
 	rwlock.o\
->>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 
