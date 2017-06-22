@@ -6,6 +6,7 @@
 #include "xv6/stat.h"
 #include "xv6/user.h"
 #include "xv6/fs.h"
+#include "string.h"
 
 int
 get_inum(char *path)

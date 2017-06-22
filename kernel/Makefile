@@ -30,12 +30,15 @@ OBJS = \
 	tui.o\
 	sysfile.o\
 	sysproc.o\
+        syssync.o\
 	timer.o\
 	trap.o\
 	uart.o\
 	trapasm.o\
 	vectors.o\
 	vm.o\
+	semaphore.o\
+	rwlock.o\
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 

@@ -1,3 +1,6 @@
+#ifndef USER_H
+#define USER_H
+
 struct stat;
 struct rtcdate;
 
@@ -31,17 +34,45 @@ int mount(int, char*, int);
 int unmount(int);
 int geteditstatus();
 int seteditstatus(int);
+int gettime(struct rtcdate*);
+
+// thread api
+int thread_create(void);
+int thread_exit(void) __attribute__((noreturn));
+int thread_wait(void);
+
+// synchronization api
+//// sleep lock
+userlock lock_create(void);
+void lock_acquire(userlock);
+void lock_release(userlock);
+int lock_holding(userlock);
+void lock_free(userlock);
+
+//// semaphore
+usersem semaphore_create(int);
+void semaphore_acquire(usersem);
+void semaphore_release(usersem);
+int semaphore_getcounter(usersem);
+void semaphore_free(usersem);
+
+//// read-write lock
+userrwlock rwlock_create(void);
+void rwlock_acquire_read(userrwlock);
+void rwlock_acquire_write(userrwlock);
+void rwlock_release_read(userrwlock);
+void rwlock_release_write(userrwlock);
+int rwlock_holding_read(userrwlock);
+int rwlock_holding_write(userrwlock);
+void rwlock_free(userrwlock);
 
 // ulib.c
 int stat(char*, struct stat*);
-char* strcpy(char*, char*);
-void *memmove(void*, void*, int);
-char* strchr(const char*, char c);
-int strcmp(const char*, const char*);
 void printf(int, char*, ...);
 char* gets(char*, int max);
-uint strlen(char*);
-void* memset(void*, int, uint);
-void* malloc(uint);
-void free(void*);
 int atoi(const char*);
+
+#include <stdlib.h>
+#include <string.h>
+
+#endif

@@ -180,8 +180,8 @@ int isalpha(char);
 int isdigit(char);
 int isalnum(char);
 char toupper(char);
-char* strstr(char*, char*);
-char* strcat(char*, char*);
+char* _strstr(char*, char*);
+char* _strcat(char*, char*);
 int stricmp(char*, char*, int);
 int readline(int, char*);
 void load_program(char*);
@@ -449,7 +449,7 @@ eval(char *eval)
                         {
                             c.type = token_operand;
                             c.var.type = var_string;
-                            strcat(b.var.s, a.var.s);
+                            _strcat(b.var.s, a.var.s);
                             strcpy(c.var.s, b.var.s);
                             stack_push(s_num, c);
                         }
@@ -595,7 +595,7 @@ eval(char *eval)
                     {
                         c.type = token_operand;
                         c.var.type = var_string;
-                        strcat(b.var.s, a.var.s);
+                        _strcat(b.var.s, a.var.s);
                         strcpy(c.var.s, b.var.s);
                         stack_push(s_num, c);
                     }
@@ -902,7 +902,7 @@ exec_for(STRING line)
     }
 
     while(*s && isspace(*s)) s++;
-    et = strstr(s, " TO ");
+    et = _strstr(s, " TO ");
     if(et != 0)
     {
         *et = '\0';
@@ -914,7 +914,7 @@ exec_for(STRING line)
         printf(1, "grammar error:for\n");
         exit();
     }
-    et = strstr(s, " STEP ");
+    et = _strstr(s, " STEP ");
     if(et != 0)
     {
         *et = '\0';
@@ -1130,7 +1130,7 @@ toupper(char c)
 }
 
 char 
-*strstr(char *s1, char * s2)
+*_strstr(char *s1, char * s2)
 {
 	int n;  
     if (*s2)                      
@@ -1155,7 +1155,7 @@ char
 }
 
 char* 
-strcat(char* str1, char* str2)  
+_strcat(char* str1, char* str2)  
 {   
     char *pt = 
 	pt = str1;  
