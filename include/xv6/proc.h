@@ -48,13 +48,6 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
-struct sighand_struct {
-  //atomic_t		count;
-  struct sigaction	action[_NSIG];
-    //struct spinlock	siglock;
-    //wait_queue_head_t	signalfd_wqh;
-};
-
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
@@ -71,26 +64,10 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
     /* signal handlers */
-<<<<<<< HEAD
     struct sighand_struct sighand;
     sigset_t blocked, real_blocked;
     sigset_t saved_sigmask;	/* restored if set_restore_sigmask() was used */
     struct sigpending pending;
-=======
-    struct signal_struct *signal;
-    struct sighand_struct sighand;
-
-    sigset_t blocked, real_blocked;
-    sigset_t saved_sigmask;	/* restored if set_restore_sigmask() was used */
-    struct sigpending pending;
-
-    unsigned long sas_ss_sp;
-    size_t sas_ss_size;
-
-    struct callback_head *task_works;
-
-    struct audit_context *audit_context;
->>>>>>> d309231487fed12c6fae079d2b20295733d43142
 };
 
 // Process memory is laid out contiguously, low addresses first:
