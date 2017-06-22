@@ -84,12 +84,14 @@ extern int sys_kill(void);
 extern int sys_link(void);
 extern int sys_mkdir(void);
 extern int sys_mknod(void);
+extern int sys_mount(void);
 extern int sys_open(void);
 extern int sys_pipe(void);
 extern int sys_read(void);
 extern int sys_sbrk(void);
 extern int sys_sleep(void);
 extern int sys_unlink(void);
+extern int sys_unmount(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
@@ -124,6 +126,8 @@ static int (*syscalls[])(void) = {
     [SYS_setcrtc] sys_setcrtc,
     [SYS_getcurpos] sys_getcurpos,
     [SYS_setcurpos] sys_setcurpos,
+    [SYS_mount]   sys_mount,
+    [SYS_unmount]   sys_unmount,
 };
 
 void syscall(void)

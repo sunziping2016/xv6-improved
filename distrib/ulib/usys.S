@@ -33,4 +33,6 @@ SYSCALL(getcrtc)
 SYSCALL(setcrtc)
 SYSCALL(getcurpos)
 SYSCALL(setcurpos)
+SYSCALL(mount)
+SYSCALL(unmount)
 
