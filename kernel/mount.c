@@ -66,3 +66,12 @@ sys_unmount(void)
     unmount(dev);
     return 0;
 }
+
+void
+mountinit(void)
+{
+    mntswend = mountsw;
+    struct fstable deffs = { deffsread, deffswrite };
+    regfs(0, &deffs);
+    mount(1, "/", 0);
+}

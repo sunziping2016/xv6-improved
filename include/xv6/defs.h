@@ -87,6 +87,9 @@ void            log_write(struct buf*);
 void            begin_op();
 void            end_op();
 
+// mount.c
+void            mountinit(void);
+
 // mp.c
 extern int      ismp;
 void            mpinit(void);
