@@ -38,7 +38,6 @@ char zeroes[BSIZE];
 uint freeinode = 1;
 uint freeblock;
 
-
 void balloc(int);
 void wsect(uint, void*);
 void winode(uint, struct dinode*);
@@ -124,9 +123,9 @@ int main(int argc, char *argv[])
 
     // Copy the superblock struct into a zero'ed buf
     // and write it out as block 1
-    memset(buf, 0, sizeof(buf));
-    memmove(buf, &sb, sizeof(sb));
-    wsect(1, buf);
+    //memset(buf, 0, sizeof(buf));
+    //memmove(buf, &sb, sizeof(sb));
+    //wsect(1, buf);
 
     // Grab an i-node for the root directory
     rootino = ialloc(T_DIR, 0); // Epoch mtime for now
@@ -145,9 +144,14 @@ int main(int argc, char *argv[])
     off = xint(din.size);
     off = ((off / BSIZE) + 1) * BSIZE;
     din.size = xint(off);
+
     winode(rootino, &din);
 
-    // Mark the in-use blocks in the free block list
+    // Mark the in-use blocks in the free block list;
+    sb.initusedblock = freeblock;
+    memset(buf, 0, sizeof(buf));
+    memmove(buf, &sb, sizeof(sb));
+    wsect(1, buf);
     balloc(freeblock);
 
     exit(0);
@@ -257,7 +261,7 @@ void iappend(uint inum, void *xp, int n)
 
     rinode(inum, &din);
     off = xint(din.size);
-    // printf("append inum %d at off %d sz %d\n", inum, off, n);
+    //printf("append inum %d at off %d sz %d\n", inum, off, n);
     while (n > 0) {
         fbn = off / BSIZE;
         assert(fbn < MAXFILE);

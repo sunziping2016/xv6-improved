@@ -8,10 +8,13 @@ struct rtcdate;
 struct spinlock;
 struct stat;
 struct superblock;
+struct proclist;
+struct semaphore;
 
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
+struct buf*     bget(uint dev, uint blockno);
 void            brelse(struct buf*);
 void            bwrite(struct buf*);
 
@@ -20,7 +23,22 @@ void            consoleinit(void);
 void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 void            panic(char*) __attribute__((noreturn));
-
+//devfull.c
+void            fullinit(void);
+//devprefctr.c
+void            perfctrinit(void);
+//devzero.c
+void            zeroinit(void);
+//devnull.c
+void            nullinit(void);
+//devrandom.c
+void            randominit(void);
+void            mix_source_entropy();
+//devhda.c
+void            hdainit(void);
+void            hdainfoinit(void);
+//devsound.c
+void            soundinit(void);
 // exec.c
 int             exec(char*, char**);
 
@@ -37,6 +55,7 @@ int             filewrite(struct file*, char*, int n);
 void            readsb(int dev, struct superblock *sb);
 int             dirlink(struct inode*, char*, uint);
 struct inode*   dirlookup(struct inode*, char*, uint*);
+struct inode*   getmntin(struct inode*);
 struct inode*   ialloc(uint, short);
 struct inode*   idup(struct inode*);
 void            iinit(int dev);
@@ -85,6 +104,9 @@ void            initlog(int dev);
 void            log_write(struct buf*);
 void            begin_op();
 void            end_op();
+
+// mount.c
+void            mountinit(void);
 
 // mp.c
 extern int      ismp;
@@ -159,6 +181,7 @@ void            timerinit(void);
 // trap.c
 void            idtinit(void);
 extern uint     ticks;
+extern uint     new_ticks;
 void            tvinit(void);
 extern struct spinlock tickslock;
 
@@ -184,6 +207,7 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
+<<<<<<< HEAD
 //[ Xv6 Networking ] Extra kernel functions
 // kernel-extra/core/kernel-init.c
 extern void     kernel_extra_init();
@@ -192,6 +216,20 @@ extern void     kernel_extra_init();
 extern int      sockread(struct file*, char*, int);
 extern int      sockwrite(struct file*, char*, int);
 extern int      sockclose(struct file*);
+=======
+void            freestackvm(pde_t *pgdir, uint stack);
+pde_t*          copystackuvm(pde_t *pgdir, uint sz, uint stack);
+
+// semaphore.c
+void            initqueue(struct proclist *list);
+void            inqueue(struct proclist *list, struct proc *p);
+struct proc*    outqueue(struct proclist *list);
+
+void            initsemaphore(struct semaphore*, int, char*);
+void            acquiresemaphore(struct semaphore*);
+void            releasesemaphore(struct semaphore*);
+int             getcounter(struct semaphore*);
+>>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

@@ -7,9 +7,12 @@
 #include "xv6/x86.h"
 #include "xv6/elf.h"
 
-int
-exec(char *path, char **argv)
+int exec(char *path, char **argv)
 {
+    // Only main thread can call this.
+    if (!proc->mthread)
+        panic("exec: calling from non-main thread");
+
     char *s, *last;
     int i, off;
     uint argc, sz, sp, ustack[3 + MAXARG + 1];
@@ -97,6 +100,8 @@ exec(char *path, char **argv)
     proc->sz = sz;
     proc->tf->eip = elf.entry;  // main
     proc->tf->esp = sp;
+    proc->ustack = sz;
+    proc->mthread = 1;
     switchuvm(proc);
     freevm(oldpgdir);
     return 0;

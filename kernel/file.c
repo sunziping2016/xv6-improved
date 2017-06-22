@@ -9,7 +9,8 @@
 #include "xv6/file.h"
 #include "xv6/spinlock.h"
 
-struct devsw devsw[NDEV];
+
+struct devsw devsw[NDEV][MDEV];
 struct {
   struct spinlock lock;
   struct file file[NFILE];
@@ -98,6 +99,7 @@ filestat(struct file *f, struct stat *st)
 int
 fileread(struct file *f, char *addr, int n)
 {
+<<<<<<< HEAD
   int r;
 
   if(f->readable == 0)
@@ -115,6 +117,22 @@ fileread(struct file *f, char *addr, int n)
   if (f->type == FD_SOCK)
     return sockread(f, addr, n);
   panic("fileread");
+=======
+    int r;
+    mix_source_entropy();
+    if (f->readable == 0)
+        return -1;
+    if (f->type == FD_PIPE)
+        return piperead(f->pipe, addr, n);
+    if (f->type == FD_INODE) {
+        ilock(f->ip);
+        if ((r = readi(f->ip, addr, f->off, n)) > 0)
+            f->off += r;
+        iunlock(f->ip);
+        return r;
+    }
+    panic("fileread");
+>>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
 }
 
 //PAGEBREAK!
@@ -122,6 +140,7 @@ fileread(struct file *f, char *addr, int n)
 int
 filewrite(struct file *f, char *addr, int n)
 {
+<<<<<<< HEAD
   int r;
 
   if(f->writable == 0)
@@ -154,6 +173,41 @@ filewrite(struct file *f, char *addr, int n)
       if(r != n1)
         panic("short filewrite");
       i += r;
+=======
+    int r;
+    mix_source_entropy();
+    if (f->writable == 0)
+        return -1;
+    if (f->type == FD_PIPE)
+        return pipewrite(f->pipe, addr, n);
+    if (f->type == FD_INODE) {
+        // write a few blocks at a time to avoid exceeding
+        // the maximum log transaction size, including
+        // i-node, indirect block, allocation blocks,
+        // and 2 blocks of slop for non-aligned writes.
+        // this really belongs lower down, since writei()
+        // might be writing a device like the console.
+        int max = ((LOGSIZE - 1 - 1 - 2) / 2) * 512;
+        int i = 0;
+        while (i < n) {
+            int n1 = n - i;
+            if (n1 > max)
+                n1 = max;
+
+            begin_op();
+            ilock(f->ip);
+            if ((r = writei(f->ip, addr + i, f->off, n1)) > 0)
+                f->off += r;
+            iunlock(f->ip);
+            end_op();
+            if (r < 0)
+                break;
+            if (r != n1)
+                panic("short filewrite");
+            i += r;
+        }
+        return i == n ? n : -1;
+>>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
     }
     return i == n ? n : -1;
   }

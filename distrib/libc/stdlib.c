@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <xv6/types.h>
 #include <xv6/user.h>
 
 typedef long Align;
@@ -52,6 +53,12 @@ static Header *morecore(unsigned int nu)
     hp->s.size = nu;
     free((void*)(hp + 1));
     return freep;
+}
+
+void malloc_test(int id)
+{
+    //myprintf("malloc_test: %d", freep);
+    printf(2, "test %d: %d\n", id, freep);
 }
 
 void *malloc(unsigned int nbytes)

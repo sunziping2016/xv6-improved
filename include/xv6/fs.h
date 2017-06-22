@@ -4,7 +4,9 @@
 
 #define ROOTINO 1  // root i-number
 #define BSIZE 512  // block size
+#define KBSIZE 1000
 
+extern  int  used_capcity, useable_capcity;
 // Disk layout:
 // [ boot block | super block | log | inode blocks | free bit map | data blocks ]
 //
@@ -18,6 +20,7 @@ struct superblock {
   uint logstart;     // Block number of first log block
   uint inodestart;   // Block number of first inode block
   uint bmapstart;    // Block number of first free map block
+  uint initusedblock;    // Block number of used  block
 };
 
 #define ADDRCOUNT 13

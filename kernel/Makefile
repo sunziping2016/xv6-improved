@@ -6,6 +6,15 @@ OUTDIR = $(BUILDDIR)/kernel
 OBJS = \
 	bio.o\
 	console.o\
+	devzero.o\
+	devrandom.o\
+	devnull.o\
+	devfull.o\
+	devhda.o\
+	sound.o\
+	devsound.o\
+	devhdainfo.o\
+	devperfctr.o\
 	entry.o\
 	exec.o\
 	file.o\
@@ -17,6 +26,7 @@ OBJS = \
 	lapic.o\
 	log.o\
 	main.o\
+	mount.o\
 	mp.o\
 	picirq.o\
 	pipe.o\
@@ -29,12 +39,14 @@ OBJS = \
 	tui.o\
 	sysfile.o\
 	sysproc.o\
+        syssync.o\
 	timer.o\
 	trap.o\
 	uart.o\
 	trapasm.o\
 	vectors.o\
 	vm.o\
+<<<<<<< HEAD
         kernel_init.o\
         mem_pool.o\
         estring.o\
@@ -44,6 +56,10 @@ OBJS = \
         inet_local_iface.o\
         inet_routing.o\
         inet_dgram.o\
+=======
+	semaphore.o\
+	rwlock.o\
+>>>>>>> 6522b8b3d2f6a0ca47fbd247b5f8fbc8c2eb3531
 
 _OBJS = $(addprefix $(OUTDIR)/,$(OBJS))
 
